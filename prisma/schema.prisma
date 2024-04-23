@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Expediente {
+  ExpedienteId                    String    @id @unique
+  NumeroExpediente              String?
+  ResumenUltimaResolucion       String?
+  Observacion                   String?
+  FechaConclucion               String?
+  EtapaProcesal                 String?
+  OrganoJurisdiccional          String?
+  Ubicacion                     String?
+  Estado                        String?
+  Proceso                       String?
+  MotivoConclucion              String?
+  Juez                          String?
+  EspecialistaLegal             String?
+  FechaInicio                   String?
+  DistritoJudicial              String?
+  Sumilla                       String?
+  Materias                      String?
+  Especialidad                  String?
+  Demanda                       String?
+  RazonSocial                   String?
+  Estudio                       String?
+  Ruc                           String?
+  Cuantia                       Float?
+  CodEstudio                    String?
+  UltimaClasificacion           String?
+  CodigoUltimaClasificacion     String?
+  FechaUltimaClasificacion      String?
+  MovimientoUltimaClasificacion String?
+  ClasificacionPriorizada       String?
+  CodigoClasificacionPriorizada String?
+  FechaClasificacionPriorizada  String?
+  MovimientoClasificacionPriorizada String?
+  CompararDemandado             String?
+  Demandado                     String?
+  Date                          String?
+  FechaPresentacion             String?
+  Grupo                         String?
+  Criticos                      String?
+  Zona                          String?
+  FechaUltimaSincronizacion     String?
+  FechaUltimaActualizacion      String?
+  NumeroSincronizaciones        Float?
+  CodigoCliente                 String?
+  NombreCliente                 String?
+  BUFFER01                      String?
+  BUFFER02                      String?
+  BUFFER03                      String?
+  NUMESTADOREGISTRO             Float?
+  VCHTIPOSINCRONIZACION         String?
+  NUMHISTORIALDOCSID            Int?
+  FECINSERCION                  String?
+  VCHTIPOCARGA                  String?
+}
+
+model TE_ESTUDIO {
+  NUMESTUDIOID Int      @id @default(autoincrement())
+  VCHNOMBRE    String?
+  // Agrega el campo de relación opuesto
+  TE_ESTUDIO_USUARIO TE_ESTUDIO_USUARIO[]
+
+  @@map("TE_ESTUDIO")
+}
+
+model TE_USUARIO {
+  NUMUSUARIOID Int      @id @default(autoincrement())
+  VCHCORREO    String
+  VCHESTADO    String?
+  VCHFECHA     String?
+  VCHTIPUSUARIO String?
+  VCHROLID Int?
+  // Agrega el campo de relación opuesto
+  TE_ESTUDIO_USUARIO TE_ESTUDIO_USUARIO[]
+
+  @@map("TE_USUARIO")
+}
+
+model TE_ESTUDIO_USUARIO {
+  NUMUSUARIOID_id Int
+  NUMESTUDIOID_id Int
+  
+  @@id([NUMESTUDIOID_id, NUMUSUARIOID_id])
+  @@map("TE_ESTUDIO_USUARIO")
+  
+  // Define la relación con TE_ESTUDIO
+  NUMESTUDIOID TE_ESTUDIO   @relation(fields: [NUMESTUDIOID_id], references: [NUMESTUDIOID])
+  
+  // Define la relación con TE_USUARIO
+  NUMUSUARIOID TE_USUARIO   @relation(fields: [NUMUSUARIOID_id], references: [NUMUSUARIOID])
+}
+
+model TE_HISTORIALDOCS {
+  NUMHISTORIALDOCSID Int      @id @default(autoincrement())
+  VCHNOMDOC     String?
+  VCHCANTEXP    String?
+  VCHESTADO     String?
+  VCHFECHACARDA String?
+}
+
+
+
+
+
+// Modelo para TE_EXPEDIENTE_TAREA
+model TE_EXPEDIENTE_TAREA {
+  NUMEXPEDTAREAID      Int       @id @default(autoincrement())
+  NUMFLUJOID           Int?
+  NUMACTIVIDADID       Int?
+  EXPEDIENTEID         String?
+  VCHNOMBRE            String?
+  VCHDESCRIPCION       String?
+  FECFECHAFIN          DateTime?
+  FECFECHAALERTA       DateTime?
+  FECFECHAESTIMADA     DateTime?
+  NUMDIASDURACION      Int?
+  VCHRESPONSABLEFINALIZA String?
+  VCHESTADO            String?
+  FECFECHACREACION     DateTime?
+  VCHUSUARIOCREACION   String?
+  FECFECACTUALIZACION  DateTime?
+  VCHUSUARIOACTUALIZ   String?
+  FECHORAFIN           DateTime?
+}
+
+// Modelo para TE_FLUJO
+model TE_FLUJO {
+  NUMFLUJOID             Int       @id @default(autoincrement())
+  VCHNOMBRE              String?
+  FECFECHACREACION       DateTime?
+  VCHUSUARIOCREACION     String?
+  NUMCANTIDADDEEXPEDIENTES Int?
+  FECFECHACTUALIZACION    DateTime?
+  VCHUSUARIOACTUALIZ     String?
+}
+
+// Modelo para TE_TAREA
+model TE_TAREA {
+  NUMTAREAID           Int       @id @default(autoincrement())
+  NUMFLUJOID           Int?
+  NUMACTIVIDADID       Int?
+  VCHNOMBRE            String?
+  NUMNUMORDEN          Int?
+  VCHDESCRIPCION       String?
+  FECFECHAINICIO       DateTime?
+  FECFECHAFINAL        DateTime?
+  NUMDIASALERTA        Int?
+  NUMDIASDURACION      Int?
+  VCHLISTAUSUARIOS     String?
+  FECFECHACREACION     DateTime?
+  VCHUSUARIOCREACION   String?
+  FECFECHACTUALIZACION  DateTime?
+  VCHUSUARIOACTUALIZ   String?
+  VCHROLES            String?
+  VCHARCHIVOS         String?
+}
+
+// Modelo para TE_ACTIVIDAD
+model TE_ACTIVIDAD {
+  NUMACTIVIDADID       Int       @id @default(autoincrement())
+  NUMFLUJOID           Int?
+  VCHNOMBRE            String?
+  NUMNUMORDEN          Int?
+  FECFECHACREACION     DateTime?
+  VCHUSUARIOCREACION   String?
+  FECFECHACTUALIZACION DateTime?
+  VCHUSUARIOACTUALIZ   String?
+}
+
+model TE_ROL {
+  NUMROLID            Int       @id @default(autoincrement())
+  NUMTAREAID          Int?
+  NUMUSUARIOID        Int?
+  VCHNOMBRE           String?
+  FECFECHACREACION    DateTime?
+  FECFECHACTUALIZACION DateTime?
+  NUMEXPEDIENTEID     String?
+}

@@ -4,19 +4,31 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@nextui-org/react": "^2.3.5",
+    "@prisma/client": "^5.12.1",
+    "amazon-cognito-identity-js": "^6.3.12",
+    "aws-sdk": "^2.1602.0",
+    "chart.js": "^4.4.2",
+    "exceljs": "^4.4.0",
+    "framer-motion": "^11.1.7",
+    "next": "14.2.2",
+    "next-auth": "^4.24.7",
+    "next-themes": "^0.3.0",
     "react": "^18",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18",
-    "next": "14.2.2"
+    "react-icons": "^5.1.0"
   },
   "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.2"
+    "eslint-config-next": "14.2.2",
+    "postcss": "^8",
+    "prisma": "^5.12.1",
+    "tailwindcss": "^3.4.1"
   }
 }
