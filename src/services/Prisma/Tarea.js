@@ -1,13 +1,11 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
-const prisma = new PrismaClient();
 
 export async function crearTarea(values, idActi, idFluj, folderName) {
   try {
     const fechaActualLima = new Date();
 
-    const nuevaCarga = await prisma.TE_TAREA.create({
+    const nuevaCarga = await db.TE_TAREA.create({
       data: {
         NUMACTIVIDADID: parseInt(idActi),
         NUMFLUJOID: parseInt(idFluj),
@@ -36,7 +34,7 @@ export async function editarTarea(values, idtarea) {
   try {
     const fechaActualLima = new Date();
 
-    const nuevaCarga = await prisma.TE_TAREA.update({
+    const nuevaCarga = await db.TE_TAREA.update({
       where: {
         NUMTAREAID: idtarea,
       },
@@ -79,7 +77,7 @@ export async function eliminarTarea(idtarea) {
 
 export async function obtenerTarea(idtarea) {
   try {
-    const tareaEditada = await prisma.TE_TAREA.findFirst({
+    const tareaEditada = await db.TE_TAREA.findFirst({
       where: {
         NUMTAREAID: idtarea,
       },

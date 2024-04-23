@@ -1,7 +1,6 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
+import { SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
-const prisma = new PrismaClient();
 
 export async function obtenerExpedienteHisto() {
   const expedientes = await db.TE_HISTORIALDOCS.findMany({
@@ -20,7 +19,7 @@ export async function crearRegistroHistorial(
   fechacarga
 ) {
   try {
-    const nuevoRegistro = await prisma.TE_HISTORIALDOCS.create({
+    const nuevoRegistro = await db.TE_HISTORIALDOCS.create({
       data: {
         VCHNOMDOC: nomdoc,
         VCHCANTEXP: cantexp,

@@ -1,11 +1,9 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
-const prisma = new PrismaClient();
 
 export async function crearUsuario(correo, tusuario, rol) {
   try {
-    const nuevoUsuario = await prisma.TE_USUARIO.create({
+    const nuevoUsuario = await db.TE_USUARIO.create({
       data: {
         VCHCORREO: correo,
         VCHESTADO: '1',

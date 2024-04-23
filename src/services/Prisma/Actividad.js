@@ -1,7 +1,5 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
-const prisma = new PrismaClient();
 
 export async function crearActividad(idflujo, nuevoNombre) {
   try {

@@ -1,11 +1,9 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
-const prisma = new PrismaClient();
 
 export async function crearRegistroEstudios(nombre) {
   try {
-    const estudioExistente = await prisma.TE_ESTUDIO.findFirst({
+    const estudioExistente = await db.TE_ESTUDIO.findFirst({
       where: {
         VCHNOMBRE: nombre,
       },
@@ -25,7 +23,7 @@ export async function crearRegistroEstudios(nombre) {
 }
 export async function crearRegistroUsuarioEstudio(usuarioId, estudioId) {
   try {
-    const nuevoRegistro = await prisma.TE_ESTUDIO_USUARIO.create({
+    const nuevoRegistro = await db.TE_ESTUDIO_USUARIO.create({
       data: {
         NUMESTUDIOID_id: estudioId,
         NUMUSUARIOID_id: usuarioId,

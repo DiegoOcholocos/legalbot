@@ -1,5 +1,4 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
 
 export async function obtenerRoles() {

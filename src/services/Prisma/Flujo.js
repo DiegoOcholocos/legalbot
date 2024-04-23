@@ -1,7 +1,5 @@
 'use server';
-import { PrismaClient, SortOrder } from '@prisma/client';
 import db from '@/libs/prisma';
-const prisma = new PrismaClient();
 
 export async function editarFlujo(idflujo, nuevoNombre) {
   try {
@@ -31,7 +29,7 @@ export async function obtenerFlujos() {
 export async function crearFlujo(flujonuevo, usuariomail) {
   try {
     const fechaActual = new Date();
-    const nuevoRegistro = await prisma.TE_FLUJO.create({
+    const nuevoRegistro = await db.TE_FLUJO.create({
       data: {
         VCHNOMBRE: flujonuevo,
         VCHUSUARIOCREACION: usuariomail.email,
