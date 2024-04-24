@@ -22,28 +22,31 @@ import {
   crearExpedienteTarea,
   obtenerExpedienteTarea,
 } from '@/services/Prisma/ExpedienteTarea';
-import { obtenerActividadesPorFlujo } from '@/services/Prisma/Actividad';
+import { obtenerActividadesPorFlujo, ObtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 
 import { useEffect, useState } from 'react';
 import Title from '@/components/utils/system/Title';
-import {
-  descargarArchivo,
-  listarArchivosCarpeta,
-} from '@/services/Aws/S3/actions';
+import DetalleExpedienteTarea from './DetalleExpedienteTarea';
+import DetalleExpedienteAsignados from './DetalleExpedienteAsignados';
 
 export default function DetalleExpediente({
   expediente,
   totalFlujos,
   userEmail,
+  TotalexpedienteTarea,
 }) {
+
+
   const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
   const [flujoId, setFlujoId] = useState('');
   const [actividades, setActividades] = useState([]);
   const router = useRouter();
   const [tareasExpediente, setTareasExpediente] = useState([]);
-  const [archivos, setArchivos] = useState([]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { expedientedatos, setexpediente} = useState(expediente);
+
   useEffect(() => {
     (async () => {
       const data = await obtenerExpedienteTarea(expediente.ExpedienteId);
@@ -53,12 +56,21 @@ export default function DetalleExpediente({
   }, []);
 
   const handleAsignWorflow = async () => {
+    if (!flujoId) {
+      onOpen(); // Modal advertencia
+      return;
+    }
+    console.log("este es el flujo", flujoId)
     const flujoData = await obtenerFlujo(flujoId);
     console.log('f:', flujoData);
+
+
+
     const actividadesData = await obtenerActividadesPorFlujo(
       flujoData.NUMFLUJOID
     );
-    console.log('a:', actividadesData);
+
+    console.log("ACTIVIDADES POR FLUJO", actividadesData)
     for (const actividad of actividadesData) {
       const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
       actividad['TAREAS'] = tareasData;
@@ -66,40 +78,43 @@ export default function DetalleExpediente({
     setActividades([...actividadesData]);
 
     setMostrarFlujoData(true);
+
+    console.log("Este es el flujo", flujoData)
+    console.log("Estas son las actividades", actividadesData)
+    for (const actividad of actividadesData) {
+      for (const tarea of actividad['TAREAS']) {
+        handleAsignTask(tarea)
+        console.log("TAREA DENTRO DEL ARREGLO ", tarea)
+      }
+      console.log("terminado")
+    }
   };
 
-  const handleDownloadFile = async (expediente) => {
-    const empresa = process.env.CLIENTE;
-    const archivos = await listarArchivosCarpeta(
-      `expedientes/${empresa}/${expediente.ExpedienteId}/`
-    );
-    archivos.map(async (archivo) => {
-      if (!archivo.Key.includes('.json')) {
-        await descargarArchivo(archivo.Key);
+  const cambiarestadotarea = async (idtarea,estado) =>{
+    try {
+      const tareaeditada = await cambiarEstadoTarea(idtarea,estado)
+      if (tareaeditada) {
+        console.log("Actualizacion de estado de tarea");
+      } else {
+        console.error(
+          `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
+        );
       }
-    });
-  };
+    }
+    catch (error) {
+    console.error('Error en handleAsignTask:', error);
+  }
+  }
 
   const handleAsignTask = async (tarea) => {
     try {
       const dataTarea = {
-        NUMEXPEDTAREAID: tarea.NUMTAREAID,
-        NUMFLUJOID: tarea.NUMFLUJOID,
-        NUMACTIVIDADID: tarea.NUMACTIVIDADID,
-        EXPEDIENTEID: expediente.ExpedienteId,
-        VCHNOMBRE: tarea.VCHNOMBRE,
-        VCHDESCRIPCION: tarea.VCHDESCRIPCION,
-        FECFECHAFIN: tarea.FECFECHAFIN,
-        FECFECHAALERTA: tarea.FECFECHAALERTA,
-        FECFECHAESTIMADA: tarea.FECFECHAESTIMADA,
-        NUMDIASDURACION: tarea.NUMDIASDURACION,
-        VCHRESPONSABLEFINALIZA: tarea.VCHRESPONSABLEFINALIZA,
-        VCHESTADO: tarea.VCHESTADO,
-        FECFECHACREACION: new Date(),
-        VCHUSUARIOCREACION: userEmail,
-        FECFECACTUALIZACION: new Date(),
-        VCHUSUARIOACTUALIZ: userEmail,
-        FECHORAFIN: tarea.FECHORAFIN,
+        vchestado: "pendiente",
+        expedienteid: expediente.ExpedienteId,
+        numtareaid: tarea.NUMTAREAID,
+        fecfechainicio: new Date(),
+        fecfechaculminacion: new Date(),
+
       };
 
       const nuevaTareaId = await crearExpedienteTarea(dataTarea);
@@ -127,14 +142,7 @@ export default function DetalleExpediente({
           </BreadcrumbItem>
         </Breadcrumbs>
       </div>
-      <Title title={`Expediente - ${expediente.NumeroExpediente}`}>
-        <Button
-          className='py-2 px-4 rounded-md'
-          onPress={() => handleDownloadFile(expediente)}
-        >
-          Ultima Resolución
-        </Button>
-      </Title>
+      <Title title={`Expediente - ${expediente.NumeroExpediente}`} />
       <div className='flex w-full flex-col px-4'>
         <Tabs aria-label='Options'>
           <Tab key='detalle' title='Detalle'>
@@ -275,110 +283,18 @@ export default function DetalleExpediente({
               </Card>
             </div>
           </Tab>
-          <Tab key='flujos' title='Flujos'>
-            <Card>
-              <CardHeader>Asignar un flujo</CardHeader>
-              <CardBody>
-                {!totalFlujos.length && (
-                  <div className='flex flex-col items-center justify-center gap-4'>
-                    <h1>No hay Flujos disponibles</h1>
-                    <Button
-                      className='py-2 px-4 rounded-md'
-                      size='md'
-                      onPress={() => router.push(`/dashboard/Flujos`)}
-                    >
-                      Crear un Flujo
-                    </Button>
-                  </div>
-                )}
-                {totalFlujos.length && (
-                  <div className='flex items-center gap-4'>
-                    <Autocomplete
-                      label='Elegir un flujo'
-                      className='max-w-xs'
-                      onSelectionChange={setFlujoId}
-                    >
-                      {totalFlujos.map((flujo) => (
-                        <AutocompleteItem
-                          key={flujo.NUMFLUJOID}
-                          value={flujo.VCHNOMBRE}
-                        >
-                          {flujo.VCHNOMBRE}
-                        </AutocompleteItem>
-                      ))}
-                    </Autocomplete>
-                    <Button
-                      className='py-2 px-4 rounded-md '
-                      size='md'
-                      onPress={() => handleAsignWorflow()}
-                    >
-                      Asginar flujo
-                    </Button>
-                  </div>
-                )}
-              </CardBody>
-            </Card>
-            <Card className='my-4'>
-              {mostrarFlujoData && (
-                <div className='p-4'>
-                  <h3>Flujo {flujoId}</h3>
-                  <Accordion>
-                    {actividades?.map((actividad, index) => (
-                      <AccordionItem
-                        key={actividad.NUMACTIVIDADID}
-                        aria-label={`Actividad ${index}`}
-                        title={actividad.VCHNOMBRE}
-                      >
-                        {actividad.TAREAS?.map((tarea) => (
-                          <div key={tarea.NUMTAREAID} className='mt-4'>
-                            <div className='flex justify-between'>
-                              <div>
-                                <h3>{tarea.VCHNOMBRE}</h3>
-                              </div>
-                              <div className='flex gap-4'>
-                                <Button
-                                  className='py-2 px-4 rounded-md'
-                                  color='primary'
-                                  size='md'
-                                  onPress={() => handleAsignTask(tarea)}
-                                >
-                                  Asignar Tarea
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
-              )}
-            </Card>
+          <Tab title='Flujos'>
+            <DetalleExpedienteTarea expedientedata={expediente} flujos = {totalFlujos}/>
           </Tab>
-          <Tab key='tareas' title='Tareas'>
-            <Card>
-              <CardHeader>Tareas asignadas al expediente</CardHeader>
-              <CardBody>
-                {!tareasExpediente.length && (
-                  <div className='flex flex-col items-center justify-center gap-4'>
-                    <h1>No hay Tareas asignadas</h1>
-                  </div>
-                )}
-                {tareasExpediente.length && (
-                  <div className='flex items-center gap-4'>
-                    {tareasExpediente.map((tarea) => (
-                      <h1 key={tarea.NUMEXPEDTAREAID}> {tarea.VCHNOMBRE}</h1>
-                    ))}
-                  </div>
-                )}
-              </CardBody>
-            </Card>
+          <Tab title='Tareas'>
+            <DetalleExpedienteAsignados expediente = {expediente}  TotalexpedienteTarea ={tareasExpediente}/>
           </Tab>
         </Tabs>
       </div>
     </>
   );
 }
+
 
 const Notification = ({ notificacion }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
