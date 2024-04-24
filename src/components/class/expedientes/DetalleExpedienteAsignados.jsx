@@ -1,127 +1,145 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import {
-    Button,
     Card,
-    useDisclosure,
-    ScrollShadow,
-    Breadcrumbs,
-    BreadcrumbItem,
-    Tabs,
-    Tab,
     CardBody,
     CardHeader,
-    Autocomplete,
-    AutocompleteItem,
-    Accordion,
-    AccordionItem,
+    Checkbox,
+    Table,
+    TableHeader,
+    TableColumn,
+    TableBody,
+    TableRow,
+    TableCell,
 } from '@nextui-org/react';
-import { obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
+import { obtenerExpedienteTarea, editarTareaActividad, obtenerDatos } from '@/services/Prisma/ExpedienteTarea';
+import { obtenerActividades } from '@/services/Prisma/Actividad';
 export default function DetalleExpedienteAsignados({
     expediente,
-    totalFlujos,
-    TotalexpedienteTarea,
-    tareas,
 }) {
-    const [tareasExpediente, setTareasExpediente] = useState([]);
-    const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const [flujoId, setFlujoId] = useState('');
+    const [actividades, setActividades] = useState([]);
+    const [tareas, setTareas] = useState([]); 
+    const [tareasAgrupadas, setTareasAgrupadas] = useState([]);
 
-    useEffect(() => {
+      useEffect(() => {
         (async () => {
-            const data = await obtenerExpedienteTarea(expediente.ExpedienteId);
-            setTareasExpediente(data);
-            console.log(data);
+          try {
+            const activ = await obtenerActividades();
+            setActividades(activ);
+            console.log("Datos expediente:", expediente.ExpedienteId);
+            const data = await obtenerDatos(expediente.ExpedienteId);
+            console.log("Datos obtenidos:", data);
+      
+            // Verifica que data contiene BOOLTERMINADO y establece el estado
+            const updatedData = data?.map(tarea => ({
+              ...tarea,
+              BOOLTERMINADO: tarea.BOOLTERMINADO !== null ? tarea.BOOLTERMINADO.toString() : "false"
+            }));
+            console.log("Se subio a set tareas");
+            setTareas(updatedData);
+            
+          } catch (error) {
+            console.error("Error al obtener los datos:", error);
+          }
         })();
-    }, []);
+      }, []); 
 
-
-    const handleAsignWorflow = async () => {
-        if (!flujoId) {
-            return;
-        }
-        console.log("este es el flujo", flujoId)
-        const flujoData = await obtenerFlujo(flujoId);
-        console.log('f:', flujoData);
-        const actividadesData = await obtenerActividadesPorFlujo(
-            flujoData.NUMFLUJOID
-        );
-        console.log("ACTIVIDADES POR FLUJO", actividadesData)
-        for (const actividad of actividadesData) {
-            const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
-            actividad['TAREAS'] = tareasData;
-        }
-        setActividades([...actividadesData]);
-
-        setMostrarFlujoData(true);
-
-        console.log("Este es el flujo", flujoData)
-        console.log("Estas son las actividades", actividadesData)
-        for (const actividad of actividadesData) {
-            console.log("TATATATATTAT", actividad['TAREAS'])
-            for (const tarea of actividad['TAREAS']) {
-                handleAsignTask(tarea)
-                console.log("TAREA DENTRO DEL ARREGLO ", tarea)
+      useEffect(() => { 
+        if (tareas.length > 0) {
+          // Agrupar tareas por NUMACTIVIDADID
+          const groupedTareas = tareas.reduce((acc, tarea) => {
+            const key = tarea["TE_TAREA"].NUMACTIVIDADID;
+            if (!acc[key]) {
+              acc[key] = [];
             }
+            acc[key].push(tarea);
+            return acc;
+          }, {});
+
+          console.log("1    ",tareas);
+          console.log("2    ",groupedTareas);
+          console.log("Se subio a set setTareasAgrupadas");
+          setTareasAgrupadas(Object.values(groupedTareas));
         }
+      }, [tareas]);
 
-        // for (const Tarea of actividadesData['TAREAS']) {
-        //   handleAsignTask(Tarea);
-        // }
-
-    };
-
-    const handleAsignTask = async (tarea) => {
+    const cambiarboolean = async (NUMEXPEDTAREAID) => {
         try {
-            const dataTarea = {
-                vchestado: "pendiente",
-                expedienteid: expediente.ExpedienteId,
-                numtareaid: tarea.NUMTAREAID,
-                fecfechainicio: new Date(),
-                fecfechaculminacion: new Date(),
-
-            };
-
-            const nuevaTareaId = await crearExpedienteTarea(dataTarea);
-            if (nuevaTareaId) {
-                setTareasExpediente([...tareasExpediente, nuevaTareaId]);
-            } else {
-                console.error(
-                    `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
-                );
+          const tarea = tareas.find((t) => t.NUMEXPEDTAREAID === NUMEXPEDTAREAID);
+          console.log("buscar tarea ===>  ", tarea);
+          if (!tarea) {
+            console.error("Tarea no encontrada");
+            return;
+          }
+          console.log("data tareas ===>  ", tareas);
+      
+          // Verificar si hay tareas anteriores de la misma actividad sin completar
+          const tareasMismaActividadMenores = tareas.filter(
+            (t) =>
+              t["TE_TAREA"].NUMACTIVIDADID < tarea["TE_TAREA"].NUMACTIVIDADID && t.BOOLTERMINADO !== "true"
+          );
+      
+          // Si hay tareas anteriores sin completar, no se puede marcar la tarea actual como completada
+          if (tareasMismaActividadMenores.length > 0) {
+            console.log(
+              "No se puede marcar como completada, tareas anteriores sin completar."
+            );
+            return;
+          }
+      
+          // Cambiar el estado de la tarea
+          await editarTareaActividad(NUMEXPEDTAREAID);
+      
+          // Actualizar el estado del checkbox en la lista de tareas
+          const updatedTareas = tareas.map((t) => {
+            if (t.NUMEXPEDTAREAID === NUMEXPEDTAREAID) {
+              return {
+                ...t,
+                BOOLTERMINADO: t.BOOLTERMINADO === "true" ? "false" : "true", // Cambiar el estado del checkbox
+              };
             }
+            return t;
+          });
+          setTareas(updatedTareas);
         } catch (error) {
-            console.error('Error en handleAsignTask:', error);
+          console.error("Error en cambiarboolean:", error);
         }
-    };
+      };
+
     return (
         <>
             <Card>
                 <CardHeader>Tareas asignadas al expediente</CardHeader>
-                <CardBody>
-                    {!TotalexpedienteTarea.length && (
-                        <div className='flex flex-col items-center justify-center gap-4'>
-                            <h1>No hay Tareas asignadas</h1>
+                    <CardBody>
+                        <div>
+                            {tareasAgrupadas.map((grupo, index) => (
+                                <Card key={index} className="my-4">
+                                <CardBody>
+                                    <Table aria-label={`Tareas del grupo ${index}`}>
+                                    <TableHeader>
+                                        <TableColumn>Actividad</TableColumn>
+                                        <TableColumn>Tareas asignadas</TableColumn>
+                                        <TableColumn>Fue Completado?</TableColumn>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {grupo.map((tarea) => (
+                                        <TableRow key={tarea.NUMEXPEDTAREAID}>
+                                            <TableCell>{tarea["TE_TAREA"]["TE_ACTIVIDAD"].VCHNOMBRE}</TableCell>
+                                            <TableCell>{tarea["TE_TAREA"].VCHNOMBRE}</TableCell>
+                                            <TableCell align="center">
+                                            <Checkbox
+                                                isSelected={tarea.BOOLTERMINADO === "true"}
+                                                onValueChange={() => cambiarboolean(tarea.NUMEXPEDTAREAID)}
+                                            />
+                                            </TableCell>
+                                        </TableRow>
+                                        ))}
+                                    </TableBody>
+                                    </Table>
+                                </CardBody>
+                                </Card>
+                            ))}
                         </div>
-                    )}
-                    {TotalexpedienteTarea.length && (
-                        <div className='flex items-center gap-4'>
-                            <div>
-                                {TotalexpedienteTarea.map(tarea => (
-                                    <Card key={tarea.NumeroExpediente}>
-                                        <CardBody style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <div>
-                                                <p>Tarea {tarea.NumeroExpediente}</p>
-                                                <p>Estado: {tarea.vchestado}</p>
-                                            </div>
-                                            <Button>Acción</Button>
-                                        </CardBody>
-                                    </Card>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </CardBody>
             </Card>
         </>

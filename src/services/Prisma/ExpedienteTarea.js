@@ -79,3 +79,86 @@ export async function crearExpedienteTarea(data) {
     throw error;
   }
 }
+
+export async function obtenerDatos(data2) {
+  const data = await db.TE_EXPEDIENTE_TAREA.findMany({
+    where: {
+      expedienteid: data2,
+    },
+    select: {
+      TE_TAREA: {
+        select: {
+          NUMTAREAID: true,
+          NUMFLUJOID: true,
+          NUMACTIVIDADID: true,
+          VCHNOMBRE: true,
+          NUMNUMORDEN: true,
+          VCHDESCRIPCION: true,
+          NUMDIASDURACION: true,
+          NUMDIASALERTA: true,
+          VCHLISTAUSUARIOS: true,
+          FECFECHACREACION: true,
+          VCHUSUARIOCREACION: true,
+          FECFECHACTUALIZACION: true,
+          VCHUSUARIOACTUALIZ: true,
+          FECFECHAINICIO: true,
+          FECFECHAFINAL: true,
+          VCHROLES: true,
+          VCHARCHIVOS: true,
+          TE_ACTIVIDAD: {
+            select: {
+              NUMACTIVIDADID: true,
+              NUMFLUJOID: true,
+              VCHNOMBRE: true,
+              NUMNUMORDEN: true,
+              FECFECHACREACION: true,
+              VCHUSUARIOCREACION: true,
+              FECFECHACTUALIZACION: true,
+              VCHUSUARIOACTUALIZ: true,
+            },
+          },
+        },
+      },
+      expedienteid: true,
+      NUMEXPEDTAREAID: true,
+      VCHESTADO: true,
+      BOOLTERMINADO: true,
+    },
+    orderBy: {
+      NUMEXPEDTAREAID: 'asc',
+    },
+  });
+  return data;
+}
+export async function editarTareaActividad(idtarea) {
+try {
+  // Obtener la tarea actual
+  const tarea = await db.TE_EXPEDIENTE_TAREA.findUnique({
+    where: {
+      NUMEXPEDTAREAID: idtarea,
+    },
+  });
+
+  if (!tarea) {
+    throw new Error("La tarea no existe");
+  }
+
+  // Cambiar el valor booleano
+  const nuevoValor = !tarea.BOOLTERMINADO;
+
+  // Actualizar la tarea con el nuevo valor
+  const ActividadAct = await db.TE_EXPEDIENTE_TAREA.update({
+    where: {
+      NUMEXPEDTAREAID: idtarea,
+    },
+    data: {
+      BOOLTERMINADO: nuevoValor,
+    },
+  });
+
+  return ActividadAct;
+} catch (error) {
+  console.error("Error al editar la actividad :", error);
+  throw error;
+}
+}
