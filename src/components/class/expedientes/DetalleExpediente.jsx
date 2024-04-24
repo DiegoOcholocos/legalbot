@@ -22,28 +22,31 @@ import {
   crearExpedienteTarea,
   obtenerExpedienteTarea,
 } from '@/services/Prisma/ExpedienteTarea';
-import { obtenerActividadesPorFlujo } from '@/services/Prisma/Actividad';
+import { obtenerActividadesPorFlujo, ObtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 
 import { useEffect, useState } from 'react';
 import Title from '@/components/utils/system/Title';
-import {
-  descargarArchivo,
-  listarArchivosCarpeta,
-} from '@/services/Aws/S3/actions';
+import DetalleExpedienteTarea from './DetalleExpedienteTarea';
+import DetalleExpedienteAsignados from './DetalleExpedienteAsignados';
 
 export default function DetalleExpediente({
   expediente,
   totalFlujos,
   userEmail,
+  TotalexpedienteTarea,
 }) {
+
+
   const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
   const [flujoId, setFlujoId] = useState('');
   const [actividades, setActividades] = useState([]);
   const router = useRouter();
   const [tareasExpediente, setTareasExpediente] = useState([]);
-  const [archivos, setArchivos] = useState([]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { expedientedatos, setexpediente} = useState(expediente);
+
   useEffect(() => {
     (async () => {
       const data = await obtenerExpedienteTarea(expediente.ExpedienteId);
@@ -53,12 +56,21 @@ export default function DetalleExpediente({
   }, []);
 
   const handleAsignWorflow = async () => {
+    if (!flujoId) {
+      onOpen(); // Modal advertencia
+      return;
+    }
+    console.log("este es el flujo", flujoId)
     const flujoData = await obtenerFlujo(flujoId);
     console.log('f:', flujoData);
+
+
+
     const actividadesData = await obtenerActividadesPorFlujo(
       flujoData.NUMFLUJOID
     );
-    console.log('a:', actividadesData);
+
+    console.log("ACTIVIDADES POR FLUJO", actividadesData)
     for (const actividad of actividadesData) {
       const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
       actividad['TAREAS'] = tareasData;
@@ -66,40 +78,48 @@ export default function DetalleExpediente({
     setActividades([...actividadesData]);
 
     setMostrarFlujoData(true);
+
+    console.log("Este es el flujo", flujoData)
+    console.log("Estas son las actividades", actividadesData)
+    for (const actividad of actividadesData) {
+      console.log("TATATATATTAT", actividad['TAREAS'])
+      for (const tarea of actividad['TAREAS']) {
+        handleAsignTask(tarea)
+        console.log("TAREA DENTRO DEL ARREGLO ", tarea)
+      }
+    }
+
+    // for (const Tarea of actividadesData['TAREAS']) {
+    //   handleAsignTask(Tarea);
+    // }
+
   };
 
-  const handleDownloadFile = async (expediente) => {
-    const empresa = process.env.CLIENTE;
-    const archivos = await listarArchivosCarpeta(
-      `expedientes/${empresa}/${expediente.ExpedienteId}/`
-    );
-    archivos.map(async (archivo) => {
-      if (!archivo.Key.includes('.json')) {
-        await descargarArchivo(archivo.Key);
+  const cambiarestadotarea = async (idtarea,estado) =>{
+    try {
+      const tareaeditada = await cambiarEstadoTarea(idtarea,estado)
+      if (tareaeditada) {
+        console.log("Actualizacion de estado de tarea");
+      } else {
+        console.error(
+          `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
+        );
       }
-    });
-  };
+    }
+    catch (error) {
+    console.error('Error en handleAsignTask:', error);
+  }
+  }
 
   const handleAsignTask = async (tarea) => {
     try {
       const dataTarea = {
-        NUMEXPEDTAREAID: tarea.NUMTAREAID,
-        NUMFLUJOID: tarea.NUMFLUJOID,
-        NUMACTIVIDADID: tarea.NUMACTIVIDADID,
-        EXPEDIENTEID: expediente.ExpedienteId,
-        VCHNOMBRE: tarea.VCHNOMBRE,
-        VCHDESCRIPCION: tarea.VCHDESCRIPCION,
-        FECFECHAFIN: tarea.FECFECHAFIN,
-        FECFECHAALERTA: tarea.FECFECHAALERTA,
-        FECFECHAESTIMADA: tarea.FECFECHAESTIMADA,
-        NUMDIASDURACION: tarea.NUMDIASDURACION,
-        VCHRESPONSABLEFINALIZA: tarea.VCHRESPONSABLEFINALIZA,
-        VCHESTADO: tarea.VCHESTADO,
-        FECFECHACREACION: new Date(),
-        VCHUSUARIOCREACION: userEmail,
-        FECFECACTUALIZACION: new Date(),
-        VCHUSUARIOACTUALIZ: userEmail,
-        FECHORAFIN: tarea.FECHORAFIN,
+        vchestado: "pendiente",
+        expedienteid: expediente.ExpedienteId,
+        numtareaid: tarea.NUMTAREAID,
+        fecfechainicio: new Date(),
+        fecfechaculminacion: new Date(),
+
       };
 
       const nuevaTareaId = await crearExpedienteTarea(dataTarea);
@@ -127,14 +147,7 @@ export default function DetalleExpediente({
           </BreadcrumbItem>
         </Breadcrumbs>
       </div>
-      <Title title={`Expediente - ${expediente.NumeroExpediente}`}>
-        <Button
-          className='py-2 px-4 rounded-md'
-          onPress={() => handleDownloadFile(expediente)}
-        >
-          Ultima Resolución
-        </Button>
-      </Title>
+      <Title title={`Expediente - ${expediente.NumeroExpediente}`} />
       <div className='flex w-full flex-col px-4'>
         <Tabs aria-label='Options'>
           <Tab key='detalle' title='Detalle'>
@@ -275,7 +288,9 @@ export default function DetalleExpediente({
               </Card>
             </div>
           </Tab>
-          <Tab key='flujos' title='Flujos'>
+          <Tab title='Flujos'>
+            <DetalleExpedienteTarea expedientedata={expediente}/>
+          {!tareasExpediente.length && (
             <Card>
               <CardHeader>Asignar un flujo</CardHeader>
               <CardBody>
@@ -314,10 +329,22 @@ export default function DetalleExpediente({
                     >
                       Asginar flujo
                     </Button>
+                    <ModalNotificaciones
+                      isOpen={isOpen}
+                      onOpenChange={onClose}
+                      mensaje="Por favor, selecciona un flujo antes de asignarlo."
+                    />
                   </div>
                 )}
               </CardBody>
             </Card>
+            )}
+            {tareasExpediente.length && (
+              <Card>
+              <CardHeader>Ya ha sido asignado un flujo</CardHeader>
+              </Card>
+             )}
+
             <Card className='my-4'>
               {mostrarFlujoData && (
                 <div className='p-4'>
@@ -340,9 +367,9 @@ export default function DetalleExpediente({
                                   className='py-2 px-4 rounded-md'
                                   color='primary'
                                   size='md'
-                                  onPress={() => handleAsignTask(tarea)}
+                                // onPress={() => handleAsignTask(tarea)}
                                 >
-                                  Asignar Tarea
+                                  Accion
                                 </Button>
                               </div>
                             </div>
@@ -355,7 +382,8 @@ export default function DetalleExpediente({
               )}
             </Card>
           </Tab>
-          <Tab key='tareas' title='Tareas'>
+          <Tab title='Tareas'>
+            <DetalleExpedienteAsignados expediente = {expediente}  TotalexpedienteTarea ={tareasExpediente}/>
             <Card>
               <CardHeader>Tareas asignadas al expediente</CardHeader>
               <CardBody>
@@ -366,9 +394,19 @@ export default function DetalleExpediente({
                 )}
                 {tareasExpediente.length && (
                   <div className='flex items-center gap-4'>
-                    {tareasExpediente.map((tarea) => (
-                      <h1 key={tarea.NUMEXPEDTAREAID}> {tarea.VCHNOMBRE}</h1>
-                    ))}
+                    <div>
+                      {TotalexpedienteTarea.map(tarea => (
+                        <Card key={tarea.NumeroExpediente}>
+                          <CardBody style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <p>Tarea {tarea.NumeroExpediente}</p>
+                              <p>Estado: {tarea.vchestado}</p>
+                            </div>
+                            <Button>Acción</Button>
+                          </CardBody>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardBody>
@@ -379,6 +417,7 @@ export default function DetalleExpediente({
     </>
   );
 }
+
 
 const Notification = ({ notificacion }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();

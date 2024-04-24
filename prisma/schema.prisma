@@ -117,25 +117,15 @@ model TE_HISTORIALDOCS {
 
 
 // Modelo para TE_EXPEDIENTE_TAREA
-model TE_EXPEDIENTE_TAREA {
-  NUMEXPEDTAREAID      Int       @id @default(autoincrement())
-  NUMFLUJOID           Int?
-  NUMACTIVIDADID       Int?
-  EXPEDIENTEID         String?
-  VCHNOMBRE            String?
-  VCHDESCRIPCION       String?
-  FECFECHAFIN          DateTime?
-  FECFECHAALERTA       DateTime?
-  FECFECHAESTIMADA     DateTime?
-  NUMDIASDURACION      Int?
-  VCHRESPONSABLEFINALIZA String?
-  VCHESTADO            String?
-  FECFECHACREACION     DateTime?
-  VCHUSUARIOCREACION   String?
-  FECFECACTUALIZACION  DateTime?
-  VCHUSUARIOACTUALIZ   String?
-  FECHORAFIN           DateTime?
+model te_expediente_tarea {
+  numexpedtareaid      Int       @id @default(autoincrement())
+  numtareaid           Int?
+  fecfechaculminacion  DateTime?
+  fecfechainicio       DateTime?
+  expedienteid         String?
+  vchestado            String?
 }
+
 
 // Modelo para TE_FLUJO
 model TE_FLUJO {
