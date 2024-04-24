@@ -1,16 +1,11 @@
-'use client';
-import { useRouter } from 'next/navigation';
-
-export const ControlSession = ({ session }) => {
-  const router = useRouter();
-  console.log(session);
+export const controlSessionExpired = ({ session }) => {
   if (session) {
     if (session.user.isExpired) {
-      router.push('/auth/login');
+      return true;
     } else {
-      router.push('/dashboard');
+      return false;
     }
   } else {
-    router.push('/auth/login');
+    return true;
   }
 };
