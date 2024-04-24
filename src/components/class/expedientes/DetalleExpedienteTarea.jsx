@@ -17,11 +17,11 @@ import {
     AccordionItem,
 } from '@nextui-org/react';
 import { obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
-import {obtenerFlujo} from '@/services/Prisma/Flujo'
+import { obtenerFlujo } from '@/services/Prisma/Flujo'
 import { obtenerActividadesPorFlujo, ObtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { crearExpedienteTarea } from '@/services/Prisma/ExpedienteTarea'
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
-export default function DetalleExpedienteTarea ({  
+export default function DetalleExpedienteTarea({
     expedientedata,
     flujos,
     TotalexpedienteTarea,
@@ -32,16 +32,16 @@ export default function DetalleExpedienteTarea ({
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [flujoId, setFlujoId] = useState('');
     const [actividades, setActividades] = useState([]);
-  useEffect(() => {
+    useEffect(() => {
 
-    (async () => {
-      console.log(expedientedata)
-      const data = await obtenerExpedienteTarea(expedientedata.ExpedienteId);
-      setTareasExpediente(data);
-      console.log(data);
-      console.log(flujos);
-    })();
-  }, []);
+        (async () => {
+            console.log(expedientedata)
+            const data = await obtenerExpedienteTarea(expedientedata.ExpedienteId);
+            setTareasExpediente(data);
+            console.log(data);
+            console.log(flujos);
+        })();
+    }, []);
 
 
     const handleAsignWorflow = async () => {
@@ -49,107 +49,110 @@ export default function DetalleExpedienteTarea ({
         const flujoData = await obtenerFlujo(flujoId);
         console.log('f:', flujoData);
         const actividadesData = await obtenerActividadesPorFlujo(
-          flujoData.NUMFLUJOID
+            flujoData.NUMFLUJOID
         );
         console.log("ACTIVIDADES POR FLUJO", actividadesData)
         for (const actividad of actividadesData) {
-          const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
-          actividad['TAREAS'] = tareasData;
+            const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
+            actividad['TAREAS'] = tareasData;
         }
         setActividades([...actividadesData]);
-    
+
         setMostrarFlujoData(true);
-    
+
         console.log("Este es el flujo", flujoData)
         console.log("Estas son las actividades", actividadesData)
         for (const actividad of actividadesData) {
-          for (const tarea of actividad['TAREAS']) {
-            handleAsignTask(tarea)
-            console.log("TAREA DENTRO DEL ARREGLO ", tarea)
-          }
+            for (const tarea of actividad['TAREAS']) {
+                handleAsignTask(tarea)
+                console.log("TAREA DENTRO DEL ARREGLO ", tarea)
+            }
         }
-    
+
         // for (const Tarea of actividadesData['TAREAS']) {
         //   handleAsignTask(Tarea);
         // }
-    
-      };
 
-      const handleAsignTask = async (tarea) => {
+    };
+
+    const handleAsignTask = async (tarea) => {
+        const fechaculminacion = new Date().getDate()+tarea.NUMDIASDURACIONN;
+        console.log("Esta es la fecha para culminar ",fechaculminacion);
         try {
-          const dataTarea = {
-            vchestado: "pendiente",
-            expedienteid: expedientedata.ExpedienteId,
-            numtareaid: tarea.NUMTAREAID,
-            fecfechainicio: new Date(),
-            fecfechaculminacion: new Date(),
-          };
-    
-          const nuevaTareaId = await crearExpedienteTarea(dataTarea);
-          if (nuevaTareaId) {
-            setTareasExpediente([...tareasExpediente, nuevaTareaId]);
-          } else {
-            console.error(
-              `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
-            );
-          }
+            const dataTarea = {
+                VCHESTADO: "pendiente",
+                expedienteid: expedientedata.ExpedienteId,
+                NUMTAREAID: tarea.NUMTAREAID,
+                FECHAINICIO: new Date(),
+                FECFECHACULMINACION: new Date(),
+                FECHFECHACREACION: new Date(),
+            };
+
+            const nuevaTareaId = await crearExpedienteTarea(dataTarea);
+            if (nuevaTareaId) {
+                setTareasExpediente([...tareasExpediente, nuevaTareaId]);
+            } else {
+                console.error(
+                    `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
+                );
+            }
         } catch (error) {
-          console.error('Error en handleAsignTask:', error);
+            console.error('Error en handleAsignTask:', error);
         }
-      };
+    };
     return (
-    <>
-        {!tareasExpediente.length && (
-            <Card>
-              <CardHeader>Asignar un flujo</CardHeader>
-              <CardBody>
-                {!flujos.length && (
-                  <div className='flex flex-col items-center justify-center gap-4'>
-                    <h1>No hay Flujos disponibles</h1>
-                    <Button
-                      className='py-2 px-4 rounded-md'
-                      size='md'
-                      onPress={() => router.push(`/dashboard/Flujos`)}
-                    >
-                      Crear un Flujo
-                    </Button>
-                  </div>
-                )}
-                {flujos.length && (
-                  <div className='flex items-center gap-4'>
-                    <Autocomplete
-                      label='Elegir un flujo'
-                      className='max-w-xs'
-                      onSelectionChange={setFlujoId}
-                    >
-                      {flujos.map((flujo) => (
-                        <AutocompleteItem
-                          key={flujo.NUMFLUJOID}
-                          value={flujo.VCHNOMBRE}
-                        >
-                          {flujo.VCHNOMBRE}
-                        </AutocompleteItem>
-                      ))}
-                    </Autocomplete>
-                    <Button
-                      className='py-2 px-4 rounded-md '
-                      size='md'
-                      onPress={() => handleAsignWorflow()}
-                    >
-                      Asginar flujo
-                    </Button>
-                  </div>
-                )} 
-              </CardBody>
-            </Card>
-            )}
+        <>
             {tareasExpediente.length && (
-              <Card>
-              <CardHeader>Ya ha sido asignado un flujo</CardHeader>
-              </Card>
-             )}
-                         <Card className='my-4'>
-              {mostrarFlujoData && (
+                <Card>
+                    <CardHeader>Ya ha sido asignado un flujo</CardHeader>
+                </Card>
+            )}
+            {!tareasExpediente.length && (
+                <Card>
+                    <CardHeader>Asignar un flujo</CardHeader>
+                    <CardBody>
+                        {!flujos.length && (
+                            <div className='flex flex-col items-center justify-center gap-4'>
+                                <h1>No hay Flujos disponibles</h1>
+                                <Button
+                                    className='py-2 px-4 rounded-md'
+                                    size='md'
+                                    onPress={() => router.push(`/dashboard/Flujos`)}
+                                >
+                                    Crear un Flujo
+                                </Button>
+                            </div>
+                        )}
+                        {flujos.length && (
+                            <div className='flex items-center gap-4'>
+                                <Autocomplete
+                                    label='Elegir un flujo'
+                                    className='max-w-xs'
+                                    onSelectionChange={setFlujoId}
+                                >
+                                    {flujos.map((flujo) => (
+                                        <AutocompleteItem
+                                            key={flujo.NUMFLUJOID}
+                                            value={flujo.VCHNOMBRE}
+                                        >
+                                            {flujo.VCHNOMBRE}
+                                        </AutocompleteItem>
+                                    ))}
+                                </Autocomplete>
+                                <Button
+                                    className='py-2 px-4 rounded-md '
+                                    size='md'
+                                    onPress={() => handleAsignWorflow()}
+                                >
+                                    Asginar flujo
+                                </Button>
+                            </div>
+                        )}
+                    </CardBody>
+                </Card>
+            )}
+            <Card className='my-4'>
+                {/* {mostrarFlujoData && (
                 <div className='p-4'>
                   <h3>Flujo {flujoId}</h3>
                   <Accordion>
@@ -182,8 +185,8 @@ export default function DetalleExpedienteTarea ({
                     ))}
                   </Accordion>
                 </div>
-              )}
+              )} */}
             </Card>
-    </>
-  );
+        </>
+    );
 }

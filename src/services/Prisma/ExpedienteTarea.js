@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function obtenerExpedienteTarea(id) {
   try {
-    const data = await db.te_expediente_tarea.findMany({
+    const data = await db.TE_EXPEDIENTE_TAREA.findMany({
       where: {
         expedienteid: id,
       },
@@ -31,7 +31,7 @@ export async function ObtenerTareasporActividad(idactividad) {
 
 export async function ObtenerTareaExpediente(IdExpediente) {
   try {
-    const data = await db.te_expediente_tarea.findMany({
+    const data = await db.TE_EXPEDIENTE_TAREA.findMany({
       where: {
         expedienteid: IdExpediente,
       },
@@ -44,12 +44,12 @@ export async function ObtenerTareaExpediente(IdExpediente) {
 
 export async function cambiarEstadoTarea(id,estado) {
   try {
-    const data = await db.te_expediente_tarea.update({
+    const data = await db.TE_EXPEDIENTE_TAREA.update({
       where: {
         expedienteid: id,
       },
       data: {
-        vchestado: estado,
+        VCHESTADO: estado,
       },
     });
     return data;
@@ -63,13 +63,14 @@ export async function cambiarEstadoTarea(id,estado) {
 
 export async function crearExpedienteTarea(data) {
   try {
-    const nuevoExpedienteTarea = await db.te_expediente_tarea.create({
+    const nuevoExpedienteTarea = await db.TE_EXPEDIENTE_TAREA.create({
       data: {
-        numtareaid: data.numtareaid,
-        fecfechaculminacion: data.fecfechaculminacionUJOID,
-        fecfechainicio: data.fecfechainicio,
+        NUMTAREAID: data.NUMTAREAID,
+        FECFECHACULMINACION: data.FECFECHACULMINACION,
+        FECHAINICIO: data.FECHAINICIO,
         expedienteid: data.expedienteid,
-        vchestado: data.vchestado,
+        VCHESTADO: data.VCHESTADO,
+        FECHFECHACREACION: data.FECHFECHACREACION,
       },
     });
     return nuevoExpedienteTarea;
