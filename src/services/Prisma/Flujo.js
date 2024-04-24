@@ -26,6 +26,8 @@ export async function obtenerFlujos() {
   return flujo;
 }
 
+
+
 export async function crearFlujo(flujonuevo, usuariomail) {
   try {
     const fechaActual = new Date();

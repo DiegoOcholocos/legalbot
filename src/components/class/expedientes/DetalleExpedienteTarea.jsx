@@ -17,10 +17,13 @@ import {
     AccordionItem,
 } from '@nextui-org/react';
 import { obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
-import {obtenerFlujos} from '@/services/Prisma/Flujo'
+import {obtenerFlujo} from '@/services/Prisma/Flujo'
+import { obtenerActividadesPorFlujo, ObtenerTareasporActividad } from '@/services/Prisma/Actividad';
+import { crearExpedienteTarea } from '@/services/Prisma/ExpedienteTarea'
+import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 export default function DetalleExpedienteTarea ({  
     expedientedata,
-    totalFlujos,
+    flujos,
     TotalexpedienteTarea,
     tareas,
 }) {
@@ -28,14 +31,12 @@ export default function DetalleExpedienteTarea ({
     const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [flujoId, setFlujoId] = useState('');
-    const {flujos, setflujos} = useState([]);
+    const [actividades, setActividades] = useState([]);
   useEffect(() => {
 
     (async () => {
       console.log(expedientedata)
       const data = await obtenerExpedienteTarea(expedientedata.ExpedienteId);
-    //   const flujos = await obtenerFlujos();
-    //   setflujos(flujos);
       setTareasExpediente(data);
       console.log(data);
       console.log(flujos);
@@ -44,9 +45,6 @@ export default function DetalleExpedienteTarea ({
 
 
     const handleAsignWorflow = async () => {
-        if (!flujoId) {
-          return;
-        }
         console.log("este es el flujo", flujoId)
         const flujoData = await obtenerFlujo(flujoId);
         console.log('f:', flujoData);
@@ -65,7 +63,6 @@ export default function DetalleExpedienteTarea ({
         console.log("Este es el flujo", flujoData)
         console.log("Estas son las actividades", actividadesData)
         for (const actividad of actividadesData) {
-          console.log("TATATATATTAT", actividad['TAREAS'])
           for (const tarea of actividad['TAREAS']) {
             handleAsignTask(tarea)
             console.log("TAREA DENTRO DEL ARREGLO ", tarea)
@@ -86,7 +83,6 @@ export default function DetalleExpedienteTarea ({
             numtareaid: tarea.NUMTAREAID,
             fecfechainicio: new Date(),
             fecfechaculminacion: new Date(),
-    
           };
     
           const nuevaTareaId = await crearExpedienteTarea(dataTarea);
@@ -107,7 +103,7 @@ export default function DetalleExpedienteTarea ({
             <Card>
               <CardHeader>Asignar un flujo</CardHeader>
               <CardBody>
-                {/* {!flujos.length && (
+                {!flujos.length && (
                   <div className='flex flex-col items-center justify-center gap-4'>
                     <h1>No hay Flujos disponibles</h1>
                     <Button
@@ -142,13 +138,8 @@ export default function DetalleExpedienteTarea ({
                     >
                       Asginar flujo
                     </Button>
-                    <ModalNotificaciones
-                      isOpen={isOpen}
-                      onOpenChange={onClose}
-                      mensaje="Por favor, selecciona un flujo antes de asignarlo."
-                    />
                   </div>
-                )} */}
+                )} 
               </CardBody>
             </Card>
             )}

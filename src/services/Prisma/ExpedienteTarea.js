@@ -66,7 +66,7 @@ export async function crearExpedienteTarea(data) {
     const nuevoExpedienteTarea = await db.te_expediente_tarea.create({
       data: {
         numtareaid: data.numtareaid,
-        fecfechaculminacion: data.NUMFLfecfechaculminacionUJOID,
+        fecfechaculminacion: data.fecfechaculminacionUJOID,
         fecfechainicio: data.fecfechainicio,
         expedienteid: data.expedienteid,
         vchestado: data.vchestado,
