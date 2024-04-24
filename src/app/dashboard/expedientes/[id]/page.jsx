@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { getExpedienteJson } from '@/services/Aws/S3/expedientes';
+import { getExpedienteJson } from '@/services/Aws/S3/actions';
 import DetalleExpediente from '@/components/class/expedientes/DetalleExpediente';
 import { options } from '@/app/api/auth/[...nextauth]/options';
 import { getServerSession } from 'next-auth';
