@@ -16,7 +16,7 @@ export async function obtenerExpedienteTarea(id) {
   }
 }
 
-export async function ObtenerTareasporActividad(idactividad) {
+export async function obtenerTareasporActividad(idactividad) {
   try {
     const data = await db.TE_TAREA.findMany({
       where: {
@@ -29,7 +29,7 @@ export async function ObtenerTareasporActividad(idactividad) {
   }
 }
 
-export async function ObtenerTareaExpediente(IdExpediente) {
+export async function obtenerTareaExpediente(IdExpediente) {
   try {
     const data = await db.TE_EXPEDIENTE_TAREA.findMany({
       where: {
@@ -42,7 +42,7 @@ export async function ObtenerTareaExpediente(IdExpediente) {
   }
 }
 
-export async function cambiarEstadoTarea(id,estado) {
+export async function cambiarEstadoTarea(id, estado) {
   try {
     const data = await db.TE_EXPEDIENTE_TAREA.update({
       where: {
@@ -57,9 +57,6 @@ export async function cambiarEstadoTarea(id,estado) {
     throw error;
   }
 }
-
-
-
 
 export async function crearExpedienteTarea(data) {
   try {

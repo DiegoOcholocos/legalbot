@@ -22,7 +22,10 @@ import {
   crearExpedienteTarea,
   obtenerExpedienteTarea,
 } from '@/services/Prisma/ExpedienteTarea';
-import { obtenerActividadesPorFlujo, ObtenerTareasporActividad } from '@/services/Prisma/Actividad';
+import {
+  obtenerActividadesPorFlujo,
+  obtenerTareasporActividad,
+} from '@/services/Prisma/Actividad';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 
@@ -37,15 +40,13 @@ export default function DetalleExpediente({
   userEmail,
   TotalexpedienteTarea,
 }) {
-
-
   const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
   const [flujoId, setFlujoId] = useState('');
   const [actividades, setActividades] = useState([]);
   const router = useRouter();
   const [tareasExpediente, setTareasExpediente] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { expedientedatos, setexpediente} = useState(expediente);
+  const { expedientedatos, setexpediente } = useState(expediente);
 
   useEffect(() => {
     (async () => {
@@ -60,17 +61,15 @@ export default function DetalleExpediente({
       onOpen(); // Modal advertencia
       return;
     }
-    console.log("este es el flujo", flujoId)
+    console.log('este es el flujo', flujoId);
     const flujoData = await obtenerFlujo(flujoId);
     console.log('f:', flujoData);
-
-
 
     const actividadesData = await obtenerActividadesPorFlujo(
       flujoData.NUMFLUJOID
     );
 
-    console.log("ACTIVIDADES POR FLUJO", actividadesData)
+    console.log('ACTIVIDADES POR FLUJO', actividadesData);
     for (const actividad of actividadesData) {
       const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
       actividad['TAREAS'] = tareasData;
@@ -79,42 +78,40 @@ export default function DetalleExpediente({
 
     setMostrarFlujoData(true);
 
-    console.log("Este es el flujo", flujoData)
-    console.log("Estas son las actividades", actividadesData)
+    console.log('Este es el flujo', flujoData);
+    console.log('Estas son las actividades', actividadesData);
     for (const actividad of actividadesData) {
       for (const tarea of actividad['TAREAS']) {
-        handleAsignTask(tarea)
-        console.log("TAREA DENTRO DEL ARREGLO ", tarea)
+        handleAsignTask(tarea);
+        console.log('TAREA DENTRO DEL ARREGLO ', tarea);
       }
-      console.log("terminado")
+      console.log('terminado');
     }
   };
 
-  const cambiarestadotarea = async (idtarea,estado) =>{
+  const cambiarestadotarea = async (idtarea, estado) => {
     try {
-      const tareaeditada = await cambiarEstadoTarea(idtarea,estado)
+      const tareaeditada = await cambiarEstadoTarea(idtarea, estado);
       if (tareaeditada) {
-        console.log("Actualizacion de estado de tarea");
+        console.log('Actualizacion de estado de tarea');
       } else {
         console.error(
           `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
         );
       }
+    } catch (error) {
+      console.error('Error en handleAsignTask:', error);
     }
-    catch (error) {
-    console.error('Error en handleAsignTask:', error);
-  }
-  }
+  };
 
   const handleAsignTask = async (tarea) => {
     try {
       const dataTarea = {
-        vchestado: "pendiente",
+        vchestado: 'pendiente',
         expedienteid: expediente.ExpedienteId,
         numtareaid: tarea.NUMTAREAID,
         fecfechainicio: new Date(),
         fecfechaculminacion: new Date(),
-
       };
 
       const nuevaTareaId = await crearExpedienteTarea(dataTarea);
@@ -284,17 +281,22 @@ export default function DetalleExpediente({
             </div>
           </Tab>
           <Tab title='Flujos'>
-            <DetalleExpedienteTarea expedientedata={expediente} flujos = {totalFlujos}/>
+            <DetalleExpedienteTarea
+              expedientedata={expediente}
+              flujos={totalFlujos}
+            />
           </Tab>
           <Tab title='Tareas'>
-            <DetalleExpedienteAsignados expediente = {expediente}  TotalexpedienteTarea ={tareasExpediente}/>
+            <DetalleExpedienteAsignados
+              expediente={expediente}
+              TotalexpedienteTarea={tareasExpediente}
+            />
           </Tab>
         </Tabs>
       </div>
     </>
   );
 }
-
 
 const Notification = ({ notificacion }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
