@@ -55,3 +55,17 @@ export async function editarEstudio(idEstudio, nuevoNombre) {
     console.error('Error al editar el estudio:', error);
   }
 }
+
+export async function eliminarEstudio(idEstudio) {
+  try {
+    const response = await db.TE_ESTUDIO.delete({
+      where: {
+        NUMESTUDIOID: idEstudio,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Error al eliminar el estudio :', error);
+    return null;
+  }
+}
