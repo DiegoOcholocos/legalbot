@@ -130,7 +130,7 @@ const ItemSidebar = ({ icon, nombre, menu, collapsed }) => {
 
 const Navbar = ({ onMenuButtonClick }) => {
   return (
-    <div className='md:hidden flex justify-end items-center w-screen md:w-full sticky z-10 py-4 px-8'>
+    <div className='md:hidden flex justify-end items-center w-screen md:w-full sticky z-50 py-4 px-8'>
       <Button onClick={onMenuButtonClick}>
         <RxHamburgerMenu size={20} />
       </Button>

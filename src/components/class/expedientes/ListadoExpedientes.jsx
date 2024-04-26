@@ -167,7 +167,7 @@ const ListadoExpedientes = ({ estudio }) => {
               </div>
             ) : (
               <Pagination
-                className='flex w-full justify-center '
+                className='flex w-full justify-center -z-0 '
                 isCompact
                 showShadow
                 initialPage={1}
