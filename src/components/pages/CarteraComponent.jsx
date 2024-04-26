@@ -12,7 +12,10 @@ import {
 } from '@nextui-org/react';
 import ExcelJS from 'exceljs';
 import { useRouter } from 'next/navigation';
-import { crearRegistroCargas } from '@/services/Prisma/Expediente';
+import {
+  crearRegistroCargas,
+  registroMasivo,
+} from '@/services/Prisma/Expediente';
 import {
   crearRegistroHistorial,
   actualizarRegistro,
@@ -32,7 +35,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   const [expedientes, setExpedientes] = useState(historialDocumentos);
   const [idArchivo, setIdArchivo] = useState('');
   const [contArchivoT, setContArchivoT] = useState(0);
-  const [count, setCount] = useState(0);
+  const [porcentaje, setPorcentaje] = useState(0);
   const limite = process.env.LIMIT_WALLET;
 
   const validarFormatoExcel = (worksheet) => {
@@ -220,19 +223,30 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
     if (validData.length > 0) {
       setUploading(true);
       try {
-        // Iterar sobre cada objeto en validData
-        validData.forEach(async (item) => {
+        const tamañoLote = 2500; // Tamaño del lote para la carga masiva
+        const lotes = [];
+        for (let i = 0; i < validData.length; i += tamañoLote) {
+          lotes.push(validData.slice(i, i + tamañoLote));
+        }
+        console.log('=== Hora Inicio Total: ', new Date());
+        let expedientesCargados = 0;
+        for (let lote of lotes) {
           try {
-            await crearRegistroCargas(item, idArchivo);
+            console.log('Insertando lote en la base de datos... : ');
+            await registroMasivo(lote, idArchivo);
           } catch (error) {
             console.error(
               'Error al insertar carga en la base de datos:',
               error
             );
           } finally {
-            setCount((prevState) => prevState + 1);
+            expedientesCargados += lote.length;
+            setPorcentaje(
+              ((expedientesCargados / validData.length) * 100).toFixed(2)
+            );
           }
-        });
+        }
+        console.log('=== Hora Fin Total: ', new Date());
         await actualizarRegistro(idArchivo);
         const expedientesData = await obtenerExpedienteHisto();
         setExpedientes(expedientesData);
@@ -272,8 +286,8 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
           </div>
         </div>
         <h3>
-          Porcentaje de Expedientes Subidos :{' '}
-          {count != 0 ? (contArchivoT / count) * 100 + ' %' : '0 %'}
+          Porcentaje de Expedientes Subidos :
+          {porcentaje ? porcentaje + '%' : '0%'}
         </h3>
         <div className='flex flex-col gap-1 px-2 '>
           {uploading && <p> - Subiendo a la nube...</p>}

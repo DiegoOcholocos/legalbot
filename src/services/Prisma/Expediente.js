@@ -593,3 +593,54 @@ function generarCodigoAleatorio(longitud) {
 
   return codigo;
 }
+
+const obtenerDatosParaRegistroMasivo = async (cargas, idArchivo) => {
+  const expedientes = [];
+  for (const carga of cargas) {
+    const intAno = parseInt(carga.AÑO);
+    const codigo = generarCodigoAleatorio(longitudCodigo);
+    var fecha = new Date();
+    var año = fecha.getFullYear();
+    var mes = ('0' + (fecha.getMonth() + 1)).slice(-2);
+    var dia = ('0' + fecha.getDate()).slice(-2);
+    var horas = ('0' + fecha.getHours()).slice(-2);
+    var minutos = ('0' + fecha.getMinutes()).slice(-2);
+    var segundos = ('0' + fecha.getSeconds()).slice(-2);
+    var fechaFormateada = `${año}-${mes}-${dia} ${horas}:${minutos}:${segundos}`;
+
+    const data = {
+      ExpedienteId: codigo,
+      Demanda: carga.DEMANDA,
+      NumeroExpediente: carga['CODIGO UNICO DE EXPEDIENTE'].toUpperCase(),
+      Ruc: carga.RUC,
+      RazonSocial: carga['RAZON SOCIAL'],
+      CodEstudio: carga['CODIGO ESTUDIO'],
+      Estudio: carga.ESTUDIO,
+      Cuantia: parseFloat(carga.Cuantía),
+      FechaPresentacion: carga['FECHA PRESENTACIÓN'],
+      Date: carga.AÑO, // Utilizar el valor convertido
+      Grupo: carga.GRUPO,
+      Criticos: carga.CRITICOS,
+      Zona: carga.ZONA,
+      CodigoCliente: carga.CodigoCliente,
+      NombreCliente: carga.NombreCliente,
+      NUMESTADOREGISTRO: -1,
+      VCHTIPOSINCRONIZACION: 'D',
+      FECINSERCION: fechaFormateada,
+      VCHTIPOCARGA: 'M',
+      NUMHISTORIALDOCSID: parseInt(idArchivo),
+    };
+    expedientes.push(data);
+  }
+  return expedientes;
+};
+
+export const registroMasivo = async (cargas, idArchivo) => {
+  const expedientes = await obtenerDatosParaRegistroMasivo(cargas, idArchivo);
+  console.log('Hora Inicio: ', new Date());
+  const nuevaCarga = await db.Expediente.createMany({
+    data: expedientes,
+  });
+  console.log('Hora Fin: ', new Date());
+  return nuevaCarga;
+};
