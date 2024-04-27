@@ -116,16 +116,50 @@ model TE_HISTORIALDOCS {
 
 
 
-// Modelo para TE_EXPEDIENTE_TAREA
 model TE_EXPEDIENTE_TAREA {
-  NUMEXPEDTAREAID      Int       @id @default(autoincrement())
+  FECHFECHACREACION   DateTime?
+  FECFECHACULMINACION DateTime?
+  FECHAINICIO          DateTime?
+  expedienteid         String?
   NUMTAREAID           Int?
   VCHESTADO            String?
-  expedienteid         String?
-  FECHAINICIO          DateTime?
-  FECFECHACULMINACION  DateTime?
-  FECHFECHACREACION     DateTime?
-  BOOLTERMINADO        Boolean?
+  NUMEXPEDTAREAID      Int       @id @default(autoincrement())
+  BOOLTERMINADO        Boolean   @default(false)
+  TE_TAREA             TE_TAREA? @relation(fields: [NUMTAREAID], references: [NUMTAREAID])
+}
+
+model TE_TAREA {
+  NUMTAREAID           Int        @id @default(autoincrement())
+  NUMFLUJOID           Int?
+  NUMACTIVIDADID       Int?
+  VCHNOMBRE            String?
+  NUMNUMORDEN          Int?
+  VCHDESCRIPCION       String?
+  NUMDIASDURACION      Int?
+  NUMDIASALERTA        Int?
+  VCHLISTAUSUARIOS     String?
+  FECFECHACREACION     DateTime?
+  VCHUSUARIOCREACION   String?
+  FECFECHACTUALIZACION DateTime?
+  VCHUSUARIOACTUALIZ   String?
+  FECFECHAINICIO       DateTime?
+  FECFECHAFINAL        DateTime?
+  VCHROLES             String?
+  VCHARCHIVOS          String?
+  TE_EXPEDIENTE_TAREA  TE_EXPEDIENTE_TAREA[]
+  TE_ACTIVIDAD         TE_ACTIVIDAD? @relation(fields: [NUMACTIVIDADID], references: [NUMACTIVIDADID])
+}
+
+model TE_ACTIVIDAD {
+  NUMACTIVIDADID       Int       @id @default(autoincrement())
+  NUMFLUJOID           Int?
+  VCHNOMBRE            String?
+  NUMNUMORDEN          Int?
+  FECFECHACREACION     DateTime?
+  VCHUSUARIOCREACION   String?
+  FECFECHACTUALIZACION DateTime?
+  VCHUSUARIOACTUALIZ   String?
+  TE_TAREA             TE_TAREA[] // Relación inversa con TE_TAREA
 }
 
 // Modelo para TE_FLUJO
@@ -139,38 +173,6 @@ model TE_FLUJO {
   VCHUSUARIOACTUALIZ     String?
 }
 
-// Modelo para TE_TAREA
-model TE_TAREA {
-  NUMTAREAID           Int       @id @default(autoincrement())
-  NUMFLUJOID           Int?
-  NUMACTIVIDADID       Int?
-  VCHNOMBRE            String?
-  NUMNUMORDEN          Int?
-  VCHDESCRIPCION       String?
-  FECFECHAINICIO       DateTime?
-  FECFECHAFINAL        DateTime?
-  NUMDIASALERTA        Int?
-  NUMDIASDURACION      Int?
-  VCHLISTAUSUARIOS     String?
-  FECFECHACREACION     DateTime?
-  VCHUSUARIOCREACION   String?
-  FECFECHACTUALIZACION  DateTime?
-  VCHUSUARIOACTUALIZ   String?
-  VCHROLES            String?
-  VCHARCHIVOS         String?
-}
-
-// Modelo para TE_ACTIVIDAD
-model TE_ACTIVIDAD {
-  NUMACTIVIDADID       Int       @id @default(autoincrement())
-  NUMFLUJOID           Int?
-  VCHNOMBRE            String?
-  NUMNUMORDEN          Int?
-  FECFECHACREACION     DateTime?
-  VCHUSUARIOCREACION   String?
-  FECFECHACTUALIZACION DateTime?
-  VCHUSUARIOACTUALIZ   String?
-}
 
 model TE_ROL {
   NUMROLID            Int       @id @default(autoincrement())
