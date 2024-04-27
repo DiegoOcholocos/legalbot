@@ -16,91 +16,66 @@ import {
   crearUsuario,
   editarUsuario,
 } from '@/services/Aws/Cognito/Usuarios';
-import { obtenerEstudios } from '@/services/Prisma/Estudio';
-import { obtenerEstudiosExpedientes } from '@/services/Prisma/Expediente';
-import { obtenerRoles } from '@/services/Prisma/Rol';
 
 export default function ModalUser({
   isOpen,
   onOpenChange,
   mode,
-  data,
-  fetchUsers,
+  editData,
+  setUsers,
+  usersList,
+  roles,
+  estudios,
+  fetchUsers
 }) {
-  const [credentials, setCredentials] = useState();
-
-  const [estudios, setEstudios] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [administradorSeleccionado, setAdministradorSeleccionado] =
-    useState(false);
+  const [data, setData] = useState({});
+  const [adminSeleccionado, setAdminSeleccionado] = useState(false)
   const [externoSeleccionado, setExternoSeleccionado] = useState(false);
 
   useEffect(() => {
-    if (!data) {
-      setCredentials({
+    console.log(editData);
+    if (!editData) {
+      setData({
         email: '',
         usuario: '',
         password: '',
         estudio: 'Estudio no asignado',
         tipoUsuario: '',
         rol: 0,
+        usuarioId: '',
+        estudioId: '',
       });
     } else {
-      setCredentials({
-        email: data.Attributes.find((attr) => attr.Name === 'email')?.Value,
-        usuario: data.Username,
+      setData({
+        email: editData.Attributes.find((attr) => attr.Name === 'email')?.Value,
+        usuario: editData.Username,
         password: '',
-        estudio: data.Attributes.find((attr) => attr.Name === 'custom:estudio')
+        estudio: editData.Attributes.find((attr) => attr.Name === 'custom:estudio')
           ?.Value,
-        tipoUsuario: data.Attributes.find(
+        tipoUsuario: editData.Attributes.find(
           (attr) => attr.Name === 'custom:tipoUsuario'
         )?.Value,
-        rol: data.Attributes.find((attr) => attr.Name === 'custom:rol')?.Value,
-        usuarioId: data.Attributes.find(
+        rol: editData.Attributes.find((attr) => attr.Name === 'custom:rol')?.Value,
+        usuarioId: editData.Attributes.find(
           (attr) => attr.Name === 'custom:usuario_id'
         )?.Value,
-        estudioId: data.Attributes.find(
+        estudioId: editData.Attributes.find(
           (attr) => attr.Name === 'custom:estudio_id'
         )?.Value,
       });
     }
-  }, [data]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const estudiosData = await obtenerEstudiosExpedientes();
-      console.log(estudiosData);
-      setEstudios(estudiosData);
-      fetchEstudios();
-
-      const roles = await obtenerRoles();
-      setRoles(roles);
-    };
-    fetchData();
-  }, []);
-
-  const fetchEstudios = async () => {
-    try {
-      const estudios = await obtenerEstudios();
-      const estudiosFormateados = estudios.map((e) => {
-        return { Estudio: e.VCHNOMBRE, CodEstudio: e.NUMESTUDIOID };
-      });
-      setEstudios((prevState) => [...prevState, ...estudiosFormateados]);
-    } catch (error) {
-      console.error('Error fetching estudios:', error);
-    }
-  };
+  }, [editData]);
 
   const handleCredentials = (e) => {
     const { name, value } = e.target;
-    setCredentials((prevState) => ({ ...prevState, [name]: value }));
+    setData((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const handleUserSelected = (userValue) => {
     if (userValue === 'Administrador') {
-      setAdministradorSeleccionado(true);
+      setAdminSeleccionado(true);
     } else {
-      setAdministradorSeleccionado(false);
+      setAdminSeleccionado(false);
     }
     if (userValue === 'usuario_externo') {
       setExternoSeleccionado(true);
@@ -110,27 +85,27 @@ export default function ModalUser({
   };
 
   const handleSubmitBtn = async () => {
-    console.log(credentials);
+    console.log(data);
     try {
       if (mode === 'crear') {
-        const res = await crearUsuario(credentials);
+        const res = await crearUsuario(data);
         if (res) {
           fetchUsers();
         }
       }
       if (mode === 'editar') {
-        const res = await editarUsuario(credentials);
+        const res = await editarUsuario(data);
         if (res) {
           fetchUsers();
         }
       }
       if (mode === 'cambiarContra') {
-        const res = await adminResetUserPassword(credentials);
+        const res = await adminResetUserPassword(data);
         if (res) {
           fetchUsers();
         }
       }
-      setCredentials({
+      setData({
         email: '',
         usuario: '',
         password: '',
@@ -166,63 +141,61 @@ export default function ModalUser({
                 />
               )}
               {(mode === 'crear' || mode === 'editar') && (
-                <Select
-                  label='Elija un tipo de usuario'
-                  name='tipoUsuario'
-                  variant='bordered'
-                  onChange={handleCredentials}
-                >
-                  <SelectItem
-                    key='Administrador'
-                    value='Administrador'
-                    onClick={() => handleUserSelected('Administrador')}
+                <>
+                  <Select
+                    label='Elija un tipo de usuario'
+                    name='tipoUsuario'
+                    variant='bordered'
+                    onChange={handleCredentials}
                   >
-                    Administrador
-                  </SelectItem>
-                  <SelectItem
-                    key='usuario_interno'
-                    value='usuario_interno'
-                    onClick={() => handleUserSelected('usuario_interno')}
-                  >
-                    Usuario interno
-                  </SelectItem>
-                  <SelectItem
-                    key='usuario_externo'
-                    value='usuario_externo'
-                    onClick={() => handleUserSelected('usuario_externo')}
-                  >
-                    Usuario externo
-                  </SelectItem>
-                </Select>
-              )}
-              {(mode === 'crear' || mode === 'editar') && (
-                <Select
-                  label='Elija un rol'
-                  name='rol'
-                  variant='bordered'
-                  onChange={handleCredentials}
-                >
-                  {roles.map((rol) => (
-                    <SelectItem key={rol.NUMROLID} value={rol.VCHNOMBRE}>
-                      {rol.VCHNOMBRE}
+                    <SelectItem
+                      key='Administrador'
+                      value='Administrador'
+                      onClick={() => handleUserSelected('Administrador')}
+                    >
+                      Administrador
                     </SelectItem>
-                  ))}
-                </Select>
-              )}
-              {(mode === 'crear' || mode === 'editar') && (
-                <Select
-                  label='Elija un estudio'
-                  name='estudio'
-                  variant='bordered'
-                  onChange={handleCredentials}
-                  isDisabled={administradorSeleccionado}
-                >
-                  {estudios.map((estudio) => (
-                    <SelectItem key={estudio.Estudio} value={estudio.Estudio}>
-                      {administradorSeleccionado ? '' : estudio.Estudio}
+                    <SelectItem
+                      key='usuario_interno'
+                      value='usuario_interno'
+                      onClick={() => handleUserSelected('usuario_interno')}
+                    >
+                      Usuario interno
                     </SelectItem>
-                  ))}
-                </Select>
+                    <SelectItem
+                      key='usuario_externo'
+                      value='usuario_externo'
+                      onClick={() => handleUserSelected('usuario_externo')}
+                    >
+                      Usuario externo
+                    </SelectItem>
+                  </Select>
+                  <Select
+                    label='Elija un rol'
+                    name='rol'
+                    variant='bordered'
+                    onChange={handleCredentials}
+                  >
+                    {roles.map((rol) => (
+                      <SelectItem key={rol.NUMROLID} value={rol.VCHNOMBRE}>
+                        {rol.VCHNOMBRE}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  <Select
+                    label='Elija un estudio'
+                    name='estudio'
+                    variant='bordered'
+                    onChange={handleCredentials}
+                    isDisabled={adminSeleccionado}
+                  >
+                    {estudios.map((estudio) => (
+                      <SelectItem key={estudio.Estudio} value={estudio.Estudio}>
+                        {adminSeleccionado ? '' : estudio.Estudio}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </>
               )}
               {mode === 'crear' && (
                 <Input

@@ -16,16 +16,23 @@ import {
 import Acciones from '@/components/utils/system/Acciones';
 
 const TablaUsuariosCognito = ({
-  usersList,
   page,
   pages,
   setPage,
+  usersList,
   isOpen,
   onOpenChange,
-  fetchUsers,
-  setModalMode,
   setEditData,
+  setMode,
+  fetchUsers
 }) => {
+
+  const handleEditUser = (user) => {
+    setMode('editar');
+    setEditData(user);
+    onOpenChange(!isOpen);
+  };
+
   const handleToggleEnable = async (user) => {
     const usrmail = user.Attributes.find((attr) => attr.Name === 'email').Value;
     if (user.Enabled) {
@@ -35,15 +42,9 @@ const TablaUsuariosCognito = ({
     }
     fetchUsers();
   };
-
-  const handleEditUser = (user) => {
-    setModalMode('editar');
-    setEditData(user);
-    onOpenChange(!isOpen);
-  };
-
+  
   const handleChangePassword = async (user) => {
-    setModalMode('cambiarContra');
+    setMode('cambiarContra');
     setEditData(user);
     onOpenChange(!isOpen);
   };
