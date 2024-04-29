@@ -87,7 +87,7 @@ const DetalleFlujo = ({ flujo, actividades, usuarios, roles }) => {
                 />
               </div>
             </div>
-            {!totActividades ? (
+            {totActividades.length === 0 ? (
               <p className='text-center py-4'>No existen Actividades</p>
             ) : (
               <>
