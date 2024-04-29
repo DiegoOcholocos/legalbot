@@ -28,7 +28,6 @@ export const getExpedienteJson = async (id, estudio) => {
     return expediente;
   } catch (error) {
     const expedienteFromDB = await obtenerExpediente(estudio, id);
-    console.log('Db: ', expedienteFromDB);
     return expedienteFromDB[0];
   }
 };

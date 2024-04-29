@@ -3,29 +3,16 @@ import {
   Button,
   Card,
   useDisclosure,
-  ScrollShadow,
   Breadcrumbs,
   BreadcrumbItem,
   Tabs,
   Tab,
-  CardBody,
-  CardHeader,
-  Autocomplete,
-  AutocompleteItem,
-  Accordion,
-  AccordionItem,
 } from '@nextui-org/react';
 import ModalNotificaciones from '@/components/utils/modals/ModalNotificaciones';
 import { useRouter } from 'next/navigation';
 
-import {
-  crearExpedienteTarea,
-  obtenerExpedienteTarea,
-} from '@/services/Prisma/ExpedienteTarea';
-import {
-  obtenerActividadesPorFlujo,
-  obtenerTareasporActividad,
-} from '@/services/Prisma/Actividad';
+import { crearExpedienteTarea, obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
+import { obtenerActividadesPorFlujo, obtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 
@@ -39,6 +26,7 @@ export default function DetalleExpediente({
   totalFlujos,
   userEmail,
   TotalexpedienteTarea,
+  tareas,
 }) {
   const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
   const [flujoId, setFlujoId] = useState('');
@@ -65,9 +53,7 @@ export default function DetalleExpediente({
     const flujoData = await obtenerFlujo(flujoId);
     console.log('f:', flujoData);
 
-    const actividadesData = await obtenerActividadesPorFlujo(
-      flujoData.NUMFLUJOID
-    );
+    const actividadesData = await obtenerActividadesPorFlujo(flujoData.NUMFLUJOID);
 
     console.log('ACTIVIDADES POR FLUJO', actividadesData);
     for (const actividad of actividadesData) {
@@ -95,9 +81,7 @@ export default function DetalleExpediente({
       if (tareaeditada) {
         console.log('Actualizacion de estado de tarea');
       } else {
-        console.error(
-          `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
-        );
+        console.error(`Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`);
       }
     } catch (error) {
       console.error('Error en handleAsignTask:', error);
@@ -118,9 +102,7 @@ export default function DetalleExpediente({
       if (nuevaTareaId) {
         setTareasExpediente([...tareasExpediente, nuevaTareaId]);
       } else {
-        console.error(
-          `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
-        );
+        console.error(`Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`);
       }
     } catch (error) {
       console.error('Error en handleAsignTask:', error);
@@ -139,7 +121,9 @@ export default function DetalleExpediente({
           </BreadcrumbItem>
         </Breadcrumbs>
       </div>
-      <Title title={`Expediente - ${expediente.NumeroExpediente}`} />
+      <Title title={`Expediente - ${expediente.NumeroExpediente}`}>
+        <Button>Ultima Resolución</Button>
+      </Title>
       <div className='flex w-full flex-col px-4'>
         <Tabs aria-label='Options'>
           <Tab key='detalle' title='Detalle'>
@@ -266,31 +250,25 @@ export default function DetalleExpediente({
                 <h3 className='font-bold text-xl'>Seguimiento</h3>
                 <div className='flex flex-col gap-3'>
                   {expediente.expedientes_seguimiento?.map((notificacion) => (
-                    <Notification
-                      key={notificacion.NumeroEsquina}
-                      notificacion={notificacion}
-                    />
+                    <Notification key={notificacion.NumeroEsquina} notificacion={notificacion} />
                   ))}
                   {!expediente.expedientes_seguimiento && (
-                    <p className='text-center py-8 '>
-                      No existen notificaciones
-                    </p>
+                    <p className='text-center py-8 '>No existen notificaciones</p>
                   )}
                 </div>
               </Card>
             </div>
           </Tab>
-          <Tab title='Flujos'>
-            <DetalleExpedienteTarea
-              expedientedata={expediente}
-              flujos={totalFlujos}
-            />
-          </Tab>
           <Tab title='Tareas'>
-            <DetalleExpedienteAsignados
-              expediente={expediente}
-              TotalexpedienteTarea={tareasExpediente}
-            />
+            {tareas.length > 0 ? (
+              <DetalleExpedienteAsignados
+                expediente={expediente}
+                tareas={tareas}
+                TotalexpedienteTarea={tareasExpediente}
+              />
+            ) : (
+              <DetalleExpedienteTarea expedientedata={expediente} flujos={totalFlujos} />
+            )}
           </Tab>
         </Tabs>
       </div>
@@ -304,8 +282,7 @@ const Notification = ({ notificacion }) => {
     <Card className='flex flex-col gap-2 rounded-lg shadow-md p-4'>
       <div className='flex flex-col gap-2'>
         <p className='text-sm uppercase'>
-          {notificacion.Acto} / {notificacion.Resolucion} -{' '}
-          {notificacion.FechaResolucion} / Tipo :{' '}
+          {notificacion.Acto} / {notificacion.Resolucion} - {notificacion.FechaResolucion} / Tipo :{' '}
           {notificacion.TipoNotificacion} / Sumilla : {notificacion.Sumilla}
         </p>
         <div className='flex items-center justify-between'>

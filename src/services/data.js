@@ -93,3 +93,9 @@ export const menu = [
     ],
   },
 ];
+
+export const estadosTareaExpediente = {
+  PENDIENTE: 'PENDIENTE',
+  TERMINADO: 'TERMINADO',
+  INACTIVO: 'INACTIVO',
+};

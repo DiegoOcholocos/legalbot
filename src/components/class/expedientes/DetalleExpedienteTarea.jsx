@@ -18,10 +18,7 @@ import {
 } from '@nextui-org/react';
 import { obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
-import {
-  obtenerActividadesPorFlujo,
-  obtenerTareasporActividad,
-} from '@/services/Prisma/Actividad';
+import { obtenerActividadesPorFlujo, obtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { crearExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 export default function DetalleExpedienteTarea({
@@ -49,9 +46,7 @@ export default function DetalleExpedienteTarea({
     console.log('este es el flujo', flujoId);
     const flujoData = await obtenerFlujo(flujoId);
     console.log('f:', flujoData);
-    const actividadesData = await obtenerActividadesPorFlujo(
-      flujoData.NUMFLUJOID
-    );
+    const actividadesData = await obtenerActividadesPorFlujo(flujoData.NUMFLUJOID);
     console.log('ACTIVIDADES POR FLUJO', actividadesData);
     for (const actividad of actividadesData) {
       const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
@@ -92,9 +87,7 @@ export default function DetalleExpedienteTarea({
       if (nuevaTareaId) {
         setTareasExpediente([...tareasExpediente, nuevaTareaId]);
       } else {
-        console.error(
-          `Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`
-        );
+        console.error(`Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`);
       }
     } catch (error) {
       console.error('Error en handleAsignTask:', error);
@@ -104,7 +97,7 @@ export default function DetalleExpedienteTarea({
     <>
       {tareasExpediente.length && (
         <Card>
-          <CardHeader>Ya ha sido asignado un flujo</CardHeader>
+          <CardHeader>Recarge la pagina porfavor</CardHeader>
         </Card>
       )}
       {!tareasExpediente.length && (
@@ -131,10 +124,7 @@ export default function DetalleExpedienteTarea({
                   onSelectionChange={setFlujoId}
                 >
                   {flujos.map((flujo) => (
-                    <AutocompleteItem
-                      key={flujo.NUMFLUJOID}
-                      value={flujo.VCHNOMBRE}
-                    >
+                    <AutocompleteItem key={flujo.NUMFLUJOID} value={flujo.VCHNOMBRE}>
                       {flujo.VCHNOMBRE}
                     </AutocompleteItem>
                   ))}
@@ -151,42 +141,7 @@ export default function DetalleExpedienteTarea({
           </CardBody>
         </Card>
       )}
-      <Card className='my-4'>
-        {/* {mostrarFlujoData && (
-                <div className='p-4'>
-                  <h3>Flujo {flujoId}</h3>
-                  <Accordion>
-                    {actividades?.map((actividad, index) => (
-                      <AccordionItem
-                        key={actividad.NUMACTIVIDADID}
-                        aria-label={`Actividad ${index}`}
-                        title={actividad.VCHNOMBRE}
-                      >
-                        {actividad.TAREAS?.map((tarea) => (
-                          <div key={tarea.NUMTAREAID} className='mt-4'>
-                            <div className='flex justify-between'>
-                              <div>
-                                <h3>{tarea.VCHNOMBRE}</h3>
-                              </div>
-                              <div className='flex gap-4'>
-                                <Button
-                                  className='py-2 px-4 rounded-md'
-                                  color='primary'
-                                  size='md'
-                                // onPress={() => handleAsignTask(tarea)}
-                                >
-                                  Accion
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
-              )} */}
-      </Card>
+      <Card className='my-4'></Card>
     </>
   );
 }
