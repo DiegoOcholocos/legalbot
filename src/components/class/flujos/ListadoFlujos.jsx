@@ -19,7 +19,13 @@ const ListadoFlujos = ({ flujos, session }) => {
       <div className=' w-full flex flex-col p-4 gap-4'>
         <Card className='flex-1 p-4 flex flex-col gap-4'>
           <h3 className='text-lg'>Flujos totales: {totFlujos.length}</h3>
-          <TablaFlujos totFlujos={totFlujos} setTotFlujos={setTotFlujos} />
+          {totFlujos.length ? (
+            <TablaFlujos totFlujos={totFlujos} setTotFlujos={setTotFlujos} />
+          ) : (
+            <div className='w-full flex justify-center items-center my-4 gap-2'>
+              <h3 className='text-lg'>No hay flujo creados</h3>
+            </div>
+          )}
         </Card>
       </div>
     </>

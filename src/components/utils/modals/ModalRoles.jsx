@@ -21,9 +21,11 @@ export default function ModalRoles({
 }) {
   const [data, setData] = useState({});
   const [error, setError] = useState('');
+  const [isValid, setIsValid] = useState(true);
   const handleCredentials = (e) => {
     const { name, value } = e.target;
     setData((prevState) => ({ ...prevState, [name]: value }));
+    setIsValid(true);
   };
 
   useEffect(() => {
@@ -32,6 +34,10 @@ export default function ModalRoles({
   }, [editData]);
 
   const saveAction = async () => {
+    if (!data.VCHNOMBRE) { 
+      setIsValid(false);
+      return;
+    }
     if (mode === 'Crear') {
       const res = await crearRol(data);
       if (res) {
@@ -83,7 +89,7 @@ export default function ModalRoles({
                   name='VCHNOMBRE'
                   variant='bordered'
                   onChange={handleCredentials}
-                  isInvalid={!data.VCHNOMBRE}
+                  isInvalid={!isValid}
                 />
               )}
               {mode === 'Editar' && (
@@ -93,17 +99,19 @@ export default function ModalRoles({
                   variant='bordered'
                   onChange={handleCredentials}
                   defaultValue={editData.VCHNOMBRE}
-                  isInvalid={!data.VCHNOMBRE}
+                  isInvalid={!isValid}
                 />
               )}
-              {mode === 'Eliminar' && <h1>Fomulario Eliminar ROL</h1>}
+              {mode === 'Eliminar' && <h1>Desea eliminar el rol {editData.VCHNOMBRE}?</h1>}
             </ModalBody>
             <ModalFooter>
               <Button color='danger' variant='light' onPress={onClose}>
-                Close
+                Cerrar
               </Button>
               <Button color='primary' onPress={saveAction}>
-                Action
+                {mode === 'Crear' && <h1>Crear</h1>}
+                {mode === 'Editar' && <h1>Editar</h1>}
+                {mode === 'Eliminar' && <h1>Aceptar</h1>}
               </Button>
             </ModalFooter>
           </>

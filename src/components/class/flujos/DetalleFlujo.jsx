@@ -87,78 +87,79 @@ const DetalleFlujo = ({ flujo, actividades, usuarios, roles }) => {
                 />
               </div>
             </div>
-            {!totActividades && (
+            {totActividades.length === 0 ? (
               <p className='text-center py-4'>No existen Actividades</p>
-            )}
-            {totActividades && (
-              <Tabs
-                fullWidth
-                radius='md'
-                color='primary'
-                onSelectionChange={setIdAct}
-              >
-                {totActividades?.map((Actividad) => (
-                  <Tab
-                    key={Actividad.NUMACTIVIDADID}
-                    color='primary'
-                    title={
-                      <div className='flex items-center relative w-full text-center justify-center '>
-                        <h1>{Actividad.VCHNOMBRE}</h1>
-                        {Actividad.NUMACTIVIDADID === parseInt(idact) && (
-                          <div className='absolute right-0 z-50'>
-                            <Dropdown backdrop='blur'>
-                              <DropdownTrigger>
-                                <Button isIconOnly size='sm' variant='light'>
-                                  <IoMdSettings />
-                                </Button>
-                              </DropdownTrigger>
-                              <DropdownMenu>
-                                <DropdownItem
-                                  onPress={() =>
-                                    editarActividad.onOpenChange(
-                                      !editarActividad.isOpen
-                                    )
-                                  }
-                                >
-                                  Editar
-                                </DropdownItem>
-                                <DropdownItem
-                                  onPress={() =>
-                                    eliminarActividad.onOpenChange(
-                                      !eliminarActividad.isOpen
-                                    )
-                                  }
-                                >
-                                  Eliminar
-                                </DropdownItem>
-                              </DropdownMenu>
-                            </Dropdown>
-                          </div>
-                        )}
-                      </div>
-                    }
-                    className='w-full block'
-                  >
-                    <TablaTareas
-                      tareas={tareas}
-                      setTareas={setTareas}
-                      usuarios={usuarios}
-                      roles={roles}
-                    />
-                  </Tab>
-                ))}
-              </Tabs>
+            ) : (
+              <>
+                <Tabs
+                  fullWidth
+                  radius='md'
+                  color='primary'
+                  onSelectionChange={setIdAct}
+                >
+                  {totActividades?.map((Actividad) => (
+                    <Tab
+                      key={Actividad.NUMACTIVIDADID}
+                      color='primary'
+                      title={
+                        <div className='flex items-center relative w-full text-center justify-center '>
+                          <h1>{Actividad.VCHNOMBRE}</h1>
+                          {Actividad.NUMACTIVIDADID === parseInt(idact) && (
+                            <div className='absolute right-0 z-50'>
+                              <Dropdown backdrop='blur'>
+                                <DropdownTrigger>
+                                  <Button isIconOnly size='sm' variant='light'>
+                                    <IoMdSettings />
+                                  </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu>
+                                  <DropdownItem
+                                    onPress={() =>
+                                      editarActividad.onOpenChange(
+                                        !editarActividad.isOpen
+                                      )
+                                    }
+                                  >
+                                    Editar
+                                  </DropdownItem>
+                                  <DropdownItem
+                                    onPress={() =>
+                                      eliminarActividad.onOpenChange(
+                                        !eliminarActividad.isOpen
+                                      )
+                                    }
+                                  >
+                                    Eliminar
+                                  </DropdownItem>
+                                </DropdownMenu>
+                              </Dropdown>
+                            </div>
+                          )}
+                        </div>
+                      }
+                      className='w-full block'
+                    >
+                      <TablaTareas
+                        tareas={tareas}
+                        setTareas={setTareas}
+                        usuarios={usuarios}
+                        roles={roles}
+                      />
+                    </Tab>
+                  ))}
+                </Tabs>
+                <div className='w-full flex justify-center items-center my-4 gap-2'>
+                  <ModalNuevaTarea
+                    idActi={idact}
+                    idFluj={flujoEd.NUMFLUJOID}
+                    totalUsuarios={usuarios}
+                    totalRol={roles}
+                    setTareas={setTareas} // Pasar la función de actualización como prop
+                  />
+                </div>
+              </>
             )}
           </CardBody>
-          <CardFooter className='flex flex-grow justify-center items-center'>
-            <ModalNuevaTarea
-              idActi={idact}
-              idFluj={flujoEd.NUMFLUJOID}
-              totalUsuarios={usuarios}
-              totalRol={roles}
-              setTareas={setTareas} // Pasar la función de actualización como prop
-            />
-          </CardFooter>
         </Card>
       </div>
       <ModalActividadEditar

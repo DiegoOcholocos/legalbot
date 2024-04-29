@@ -138,12 +138,12 @@ export const adminEnableUser = async (username, mail) => {
   });
 };
 
-export const editarUsuario = async (credentials) => {
-  console.log(credentials);
+export const editarUsuario = async (data) => {
+  console.log(data);
   await editarUsuarioP(
-    Number(credentials.usuarioId),
-    credentials.tipoUsuario,
-    Number(credentials.rol)
+    Number(data.usuarioId),
+    data.tipoUsuario,
+    Number(data.rol)
   );
 
   return new Promise((resolve, reject) => {
@@ -153,22 +153,22 @@ export const editarUsuario = async (credentials) => {
 
     const params = {
       UserPoolId: poolData.UserPoolId,
-      Username: credentials.usuario,
+      Username: data.usuario,
       UserAttributes: [
         {
           Name: 'custom:estudio',
           Value:
-            credentials.tipoUsuario === 'Administrador'
+            data.tipoUsuario === 'Administrador'
               ? ''
-              : credentials.estudio,
+              : data.estudio,
         },
         {
           Name: 'custom:tipoUsuario',
-          Value: credentials.tipoUsuario,
+          Value: data.tipoUsuario,
         },
         {
           Name: 'custom:rol',
-          Value: credentials.rol,
+          Value: data.rol,
         },
       ],
     };

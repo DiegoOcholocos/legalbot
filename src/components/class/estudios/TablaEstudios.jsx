@@ -14,8 +14,10 @@ import {
   TableRow,
 } from '@nextui-org/react';
 import Acciones from '@/components/utils/system/Acciones';
+import { FaEdit } from 'react-icons/fa';
+import { MdDelete } from 'react-icons/md';
 
-export default function TablaEstudios({ estudiosList, handleEditEstudio }) {
+export default function TablaEstudios({ estudiosList, activeModal }) {
   return (
     <Table
       removeWrapper
@@ -34,9 +36,13 @@ export default function TablaEstudios({ estudiosList, handleEditEstudio }) {
           const items = [
             {
               name: 'Editar',
-              action: () => {
-                handleEditEstudio(estudio);
-              },
+              icon: <FaEdit />,
+              action: () => activeModal('Editar', estudio),
+            },
+            {
+              name: 'Eliminar',
+              icon: <MdDelete />,
+              action: () => activeModal('Eliminar', estudio),
             },
           ];
           return (
