@@ -12,7 +12,7 @@ import ModalNotificaciones from '@/components/utils/modals/ModalNotificaciones';
 import { useRouter } from 'next/navigation';
 
 import { crearExpedienteTarea, obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
-import { obtenerActividadesPorFlujo, obtenerTareasporActividad } from '@/services/Prisma/Actividad';
+import { obtenerActividadesPorFlujo } from '@/services/Prisma/Actividad';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
 
@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react';
 import Title from '@/components/utils/system/Title';
 import DetalleExpedienteTarea from './DetalleExpedienteTarea';
 import DetalleExpedienteAsignados from './DetalleExpedienteAsignados';
-import { descargarArchivo, listarArchivosCarpeta } from '@/services/Aws/S3/actions';
+import { descargarArchivo } from '@/services/Aws/S3/actions';
 
 export default function DetalleExpediente({
   expediente,
@@ -36,7 +36,6 @@ export default function DetalleExpediente({
   const [tareasExpediente, setTareasExpediente] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { expedientedatos, setexpediente } = useState(expediente);
-
   useEffect(() => {
     (async () => {
       const data = await obtenerExpedienteTarea(expediente.ExpedienteId);
@@ -56,7 +55,7 @@ export default function DetalleExpediente({
 
     const actividadesData = await obtenerActividadesPorFlujo(flujoData.NUMFLUJOID);
 
-    console.log('ACTIVIDADES POR FLUJO', actividadesData);
+    console.log('ACTIVIDADES  POR FLUJO', actividadesData);
     for (const actividad of actividadesData) {
       const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
       actividad['TAREAS'] = tareasData;
@@ -74,30 +73,6 @@ export default function DetalleExpediente({
       }
       console.log('terminado');
     }
-  };
-
-  const cambiarestadotarea = async (idtarea, estado) => {
-    try {
-      const tareaeditada = await cambiarEstadoTarea(idtarea, estado);
-      if (tareaeditada) {
-        console.log('Actualizacion de estado de tarea');
-      } else {
-        console.error(`Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`);
-      }
-    } catch (error) {
-      console.error('Error en handleAsignTask:', error);
-    }
-  };
-  const handleDownloadFile = async (expediente) => {
-    const empresa = process.env.CLIENTE;
-    const archivos = await listarArchivosCarpeta(
-      `expedientes/${empresa}/${expediente.ExpedienteId}/`
-    );
-    archivos.map(async (archivo) => {
-      if (!archivo.Key.includes('.json')) {
-        await descargarArchivo(archivo.Key);
-      }
-    });
   };
 
   const handleAsignTask = async (tarea) => {
@@ -133,12 +108,7 @@ export default function DetalleExpediente({
           </BreadcrumbItem>
         </Breadcrumbs>
       </div>
-      <Title title={`Expediente - ${expediente.NumeroExpediente}`}>
-        <Button className='py-2 px-4 rounded-md' onPress={() => handleDownloadFile(expediente)}>
-          Ultima Resolución
-        </Button>
-      </Title>
-
+      <Title title={`Expediente - ${expediente.NumeroExpediente}`} />
       <div className='flex w-full flex-col px-4'>
         <Tabs aria-label='Options'>
           <Tab key='detalle' title='Detalle'>
@@ -293,6 +263,11 @@ export default function DetalleExpediente({
 
 const Notification = ({ notificacion }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const empresa = process.env.CLIENTE;
+  const handleDownloadFile = async (archivo) => {
+    const ruta = `expedientes/${empresa}${archivo}`;
+    await descargarArchivo(ruta);
+  };
   return (
     <Card className='flex flex-col gap-2 rounded-lg shadow-md p-4'>
       <div className='flex flex-col gap-2'>
@@ -312,6 +287,17 @@ const Notification = ({ notificacion }) => {
             Cantidad de Notificaciones {notificacion.Notificaciones.length}
           </Button>
         </div>
+        {notificacion.EnlaceDescarga && (
+          <div className='flex items-center justify-end'>
+            <Button
+              color='primary'
+              className='text-xs px-4  text-white'
+              onPress={() => handleDownloadFile(notificacion.EnlaceDescarga)}
+            >
+              Descargar Resolución
+            </Button>
+          </div>
+        )}
         <ModalNotificaciones
           isOpen={isOpen}
           onOpenChange={onOpenChange}

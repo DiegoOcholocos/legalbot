@@ -160,6 +160,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
   const selectedUsersValue = useMemo(() => {
     const selectedUsers = Array.from(selectedKeys).map((key) => {
+      console.log('key:', key);
       const user = totalUsuarios.find((usuario) => usuario.NUMUSUARIOID === parseInt(key));
       return user ? user.VCHCORREO.split('@')[0] : '';
     });
@@ -168,6 +169,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
   const selectedRolesValue = useMemo(() => {
     const selectedRoles = Array.from(selectedKeys2).map((key) => {
+      console.log('key:', key);
       const rol = totalRol.find((rol) => rol.NUMROLID === parseInt(key));
       return rol?.VCHNOMBRE;
     });

@@ -37,12 +37,8 @@ export default function ModalEditarTarea({
     accessKeyId: 'AKIAVNIGRL6VQALTCM77',
     secretAccessKey: '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',
   });
-  const [selectedKeys, setSelectedKeys] = useState(
-    new Set([Tarea?.VCHLISTAUSUARIOS.split(',')])
-  );
-  const [selectedKeys2, setSelectedKeys2] = useState(
-    new Set([Tarea?.VCHROLES.split(',')])
-  );
+  const [selectedKeys, setSelectedKeys] = useState(new Set([Tarea?.VCHLISTAUSUARIOS.split(',')]));
+  const [selectedKeys2, setSelectedKeys2] = useState(new Set([Tarea?.VCHROLES.split(',')]));
   //const Archivo = getArchivoTarea(Tarea.VCHARCHIVOS);
 
   // const {Archivo, setArchivo} = useState(await.getArchivoTarea(Tarea.VCHARCHIVOS))
@@ -98,7 +94,7 @@ export default function ModalEditarTarea({
     }
   };
 
-  const empresa = process.env.EMPRESA;
+  const empresa = process.env.CLIENTE;
 
   const handleDeleteFile = async (archivo) => {
     const params = {
@@ -200,9 +196,7 @@ export default function ModalEditarTarea({
 
   const selectedUsersValue = useMemo(() => {
     const selectedUsers = Array.from(selectedKeys).map((key) => {
-      const user = totalUsuarios.find(
-        (usuario) => usuario.NUMUSUARIOID === parseInt(key)
-      );
+      const user = totalUsuarios.find((usuario) => usuario.NUMUSUARIOID === parseInt(key));
       return user ? user.VCHCORREO.split('@')[0] : '';
     });
     return selectedUsers.join(', ');
@@ -234,17 +228,11 @@ export default function ModalEditarTarea({
     }
   };
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={() => onOpenChange(!isOpen)}
-      placement='top-center'
-    >
+    <Modal isOpen={isOpen} onOpenChange={() => onOpenChange(!isOpen)} placement='top-center'>
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className='flex flex-col gap-1'>
-              Editar Tarea
-            </ModalHeader>
+            <ModalHeader className='flex flex-col gap-1'>Editar Tarea</ModalHeader>
             <ModalBody>
               <Input
                 autoFocus
@@ -288,9 +276,7 @@ export default function ModalEditarTarea({
               <Dropdown>
                 <DropdownTrigger>
                   <Button variant='bordered' className='uppercase'>
-                    {selectedUsersValue === ''
-                      ? 'Seleccione Usuarios'
-                      : selectedUsersValue}
+                    {selectedUsersValue === '' ? 'Seleccione Usuarios' : selectedUsersValue}
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
@@ -303,10 +289,7 @@ export default function ModalEditarTarea({
                   onSelectionChange={handleSelectionChange}
                 >
                   {totalUsuarios.map((usuario) => (
-                    <DropdownItem
-                      key={usuario.NUMUSUARIOID}
-                      value={usuario.VCHCORREO}
-                    >
+                    <DropdownItem key={usuario.NUMUSUARIOID} value={usuario.VCHCORREO}>
                       {usuario.VCHCORREO}
                     </DropdownItem>
                   ))}
@@ -316,9 +299,7 @@ export default function ModalEditarTarea({
               <Dropdown>
                 <DropdownTrigger>
                   <Button variant='bordered' className='uppercase'>
-                    {selectedRolesValue === ''
-                      ? 'Seleccione Roles'
-                      : selectedRolesValue}
+                    {selectedRolesValue === '' ? 'Seleccione Roles' : selectedRolesValue}
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu
@@ -331,10 +312,7 @@ export default function ModalEditarTarea({
                   onSelectionChange={handleSelectionChange2}
                 >
                   {totalRol?.map((usuario) => (
-                    <DropdownItem
-                      key={usuario.NUMROLID}
-                      value={usuario.VCHNOMBRE}
-                    >
+                    <DropdownItem key={usuario.NUMROLID} value={usuario.VCHNOMBRE}>
                       {usuario.VCHNOMBRE}
                     </DropdownItem>
                   ))}
@@ -364,11 +342,7 @@ export default function ModalEditarTarea({
                     className='w-full flex justify-between items-center hover:bg-gray-700 p-2 rounded-md'
                   >
                     <h3 className='text-sm font-semibold'>
-                      {
-                        archivo.Key.split('/')[
-                          archivo.Key.split('/').length - 1
-                        ]
-                      }
+                      {archivo.Key.split('/')[archivo.Key.split('/').length - 1]}
                     </h3>
                     <div className='flex gap-4'>
                       <Button
