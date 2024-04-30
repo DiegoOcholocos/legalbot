@@ -11,7 +11,7 @@ export async function crearRegistroEstudios(nombre) {
     if (estudioExistente) {
       return estudioExistente;
     }
-    const nuevoEstudio = await prisma.TE_ESTUDIO.create({
+    const nuevoEstudio = await db.TE_ESTUDIO.create({
       data: {
         VCHNOMBRE: nombre,
       },
