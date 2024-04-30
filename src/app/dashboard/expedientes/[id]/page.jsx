@@ -9,11 +9,12 @@ import { validarEstudio } from '@/services/Session/validacionEstudio';
 import { obtenerDatos } from '@/services/Prisma/ExpedienteTarea';
 
 export default async function pageExpediente({ params: { id } }) {
+  console.log('id:', id);
   const session = await getServerSession(options);
   const estudio = await validarEstudio({ session });
   const expediente = await getExpedienteJson(id, estudio);
-  if (expediente === null) {
-    return <h1>Porfavor Recarge la pagina para volverlo intentar</h1>;
+  if (expediente === null || expediente === undefined) {
+    return <h1>Expediente no Existe</h1>;
   }
   if (expediente?.Estudio !== estudio && session.user.tipoUsuario !== 'Administrador') {
     return <h1>Expediente no encontrado</h1>;
