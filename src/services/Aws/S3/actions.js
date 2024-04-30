@@ -16,7 +16,7 @@ const s3 = new AWS.S3();
 
 export const getExpedienteJson = async (id, estudio) => {
   try {
-    const empresa = process.env.EMPRESA;
+    const empresa = process.env.CLIENTE;
     const paramS3 = {
       Bucket: 'expedientespjvf',
       Key: `expedientes/${empresa}/${id}/${id}.json`,

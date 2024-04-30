@@ -19,13 +19,7 @@ import {
 import { crearTarea } from '@/services/Prisma/Tarea';
 import AWS from 'aws-sdk';
 
-export default function ModalNuevaTarea({
-  idActi,
-  idFluj,
-  totalUsuarios,
-  totalRol,
-  setTareas,
-}) {
+export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRol, setTareas }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [selectedKeys2, setSelectedKeys2] = useState(new Set([]));
@@ -38,7 +32,7 @@ export default function ModalNuevaTarea({
   });
   const [isSelected, setIsSelected] = useState(false);
 
-  const empresa = process.env.EMPRESA;
+  const empresa = process.env.CLIENTE;
 
   const handleSelectionChange = (keys) => {
     console.log('usuarios ==>', keys);
@@ -120,9 +114,7 @@ export default function ModalNuevaTarea({
   const selectedUsersValue = useMemo(() => {
     const selectedUsers = Array.from(selectedKeys).map((key) => {
       console.log('key:', key);
-      const user = totalUsuarios.find(
-        (usuario) => usuario.NUMUSUARIOID === parseInt(key)
-      );
+      const user = totalUsuarios.find((usuario) => usuario.NUMUSUARIOID === parseInt(key));
       return user ? user.VCHCORREO.split('@')[0] : '';
     });
     return selectedUsers.join(', ');
@@ -143,17 +135,11 @@ export default function ModalNuevaTarea({
       <Button onPress={onOpen} color='danger' style={{ marginLeft: '20px' }}>
         Crear Tarea
       </Button>
-      <Modal
-        isOpen={isOpen}
-        onOpenChange={() => onOpenChange(!isOpen)}
-        placement='top-center'
-      >
+      <Modal isOpen={isOpen} onOpenChange={() => onOpenChange(!isOpen)} placement='top-center'>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className='flex flex-col gap-1'>
-                Nueva Tarea
-              </ModalHeader>
+              <ModalHeader className='flex flex-col gap-1'>Nueva Tarea</ModalHeader>
               <ModalBody>
                 <Input
                   autoFocus
@@ -198,9 +184,7 @@ export default function ModalNuevaTarea({
                 <Dropdown>
                   <DropdownTrigger>
                     <Button variant='bordered' className='uppercase'>
-                      {selectedUsersValue === ''
-                        ? 'Seleccione Usuarios'
-                        : selectedUsersValue}
+                      {selectedUsersValue === '' ? 'Seleccione Usuarios' : selectedUsersValue}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
@@ -213,10 +197,7 @@ export default function ModalNuevaTarea({
                     onSelectionChange={handleSelectionChange}
                   >
                     {totalUsuarios.map((usuario) => (
-                      <DropdownItem
-                        key={usuario.NUMUSUARIOID}
-                        value={usuario.VCHCORREO}
-                      >
+                      <DropdownItem key={usuario.NUMUSUARIOID} value={usuario.VCHCORREO}>
                         {usuario.VCHCORREO}
                       </DropdownItem>
                     ))}
@@ -226,9 +207,7 @@ export default function ModalNuevaTarea({
                 <Dropdown>
                   <DropdownTrigger>
                     <Button variant='bordered' className='uppercase'>
-                      {selectedRolesValue === ''
-                        ? 'Seleccione Usuarios'
-                        : selectedRolesValue}
+                      {selectedRolesValue === '' ? 'Seleccione Usuarios' : selectedRolesValue}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
@@ -241,10 +220,7 @@ export default function ModalNuevaTarea({
                     onSelectionChange={handleSelectionChange2}
                   >
                     {totalRol?.map((usuario) => (
-                      <DropdownItem
-                        key={usuario.NUMROLID}
-                        value={usuario.VCHNOMBRE}
-                      >
+                      <DropdownItem key={usuario.NUMROLID} value={usuario.VCHNOMBRE}>
                         {usuario.VCHNOMBRE}
                       </DropdownItem>
                     ))}
