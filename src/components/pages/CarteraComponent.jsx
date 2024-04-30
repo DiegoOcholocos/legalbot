@@ -12,16 +12,14 @@ import {
 } from '@nextui-org/react';
 import ExcelJS from 'exceljs';
 import { useRouter } from 'next/navigation';
-import {
-  crearRegistroCargas,
-  registroMasivo,
-} from '@/services/Prisma/Expediente';
+import { crearRegistroCargas, registroMasivo } from '@/services/Prisma/Expediente';
 import {
   crearRegistroHistorial,
   actualizarRegistro,
   obtenerExpedienteHisto,
 } from '@/services/Prisma/HistorialDocumentos';
 import Title from '../utils/system/Title';
+import { crearRegistroMasivo } from '@/services/Prisma/Estudio';
 
 const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   const [excelData, setExcelData] = useState([]);
@@ -40,9 +38,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
 
   const validarFormatoExcel = (worksheet) => {
     if (!worksheet || worksheet.rowCount < 1) {
-      console.error(
-        'Error al cargar el archivo Excel. Verifica que el archivo sea válido.'
-      );
+      console.error('Error al cargar el archivo Excel. Verifica que el archivo sea válido.');
       setValidFormat(false);
       return false;
     }
@@ -162,9 +158,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         const expedientesData = await obtenerExpedienteHisto();
         setExpedientes(expedientesData);
       } else {
-        console.error(
-          'Formato de Excel no válido. Por favor, verifica la estructura.'
-        );
+        console.error('Formato de Excel no válido. Por favor, verifica la estructura.');
       }
 
       if (newErrors.length > 0) {
@@ -213,9 +207,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
     const validData = excelData.filter((expediente) => {
       // Verificar si hay errores para esta fila
       const tieneError = errors.some(
-        (error) =>
-          error['CODIGO UNICO DE EXPEDIENTE'] ===
-          expediente['CODIGO UNICO DE EXPEDIENTE']
+        (error) => error['CODIGO UNICO DE EXPEDIENTE'] === expediente['CODIGO UNICO DE EXPEDIENTE']
       );
       // Devolver falso si hay un error para esta fila, verdadero en caso contrario
       return !tieneError;
@@ -228,22 +220,29 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         for (let i = 0; i < validData.length; i += tamañoLote) {
           lotes.push(validData.slice(i, i + tamañoLote));
         }
+
         console.log('=== Hora Inicio Total: ', new Date());
+        let estudiosUnicos = new Set();
+        validData.forEach((expediente) => {
+          const claveUnica = `${expediente['CODIGO ESTUDIO']}/-/${expediente.ESTUDIO}`;
+          estudiosUnicos.add(claveUnica);
+        });
+
+        var estudios = Array.from(estudiosUnicos).map((estudio) => {
+          const [codigo, nombre] = estudio.split('/-/');
+          return { NUMESTUDIOID: codigo, VCHNOMBRE: nombre };
+        });
+        const estudiosCreados = await crearRegistroMasivo(estudios);
         let expedientesCargados = 0;
         for (let lote of lotes) {
           try {
             console.log('Insertando lote en la base de datos... : ');
             await registroMasivo(lote, idArchivo);
           } catch (error) {
-            console.error(
-              'Error al insertar carga en la base de datos:',
-              error
-            );
+            console.error('Error al insertar carga en la base de datos:', error);
           } finally {
             expedientesCargados += lote.length;
-            setPorcentaje(
-              ((expedientesCargados / validData.length) * 100).toFixed(2)
-            );
+            setPorcentaje(((expedientesCargados / validData.length) * 100).toFixed(2));
           }
         }
         console.log('=== Hora Fin Total: ', new Date());
@@ -285,24 +284,15 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
             </p>
           </div>
         </div>
-        <h3>
-          Porcentaje de Expedientes Subidos :
-          {porcentaje ? porcentaje + '%' : '0%'}
-        </h3>
+        <h3>Porcentaje de Expedientes Subidos :{porcentaje ? porcentaje + '%' : '0%'}</h3>
         <div className='flex flex-col gap-1 px-2 '>
           {uploading && <p> - Subiendo a la nube...</p>}
-          {uploadCompleted && (
-            <p> - La carga a la Nube se ha completado exitosamente.</p>
-          )}
+          {uploadCompleted && <p> - La carga a la Nube se ha completado exitosamente.</p>}
           {uploading ? <p>Subiendo...</p> : null}
           {validFormat === false && (
-            <p>
-              - Formato de Excel no válido. Por favor, verifica la estructura.
-            </p>
+            <p>- Formato de Excel no válido. Por favor, verifica la estructura.</p>
           )}
-          {validFormat === false && (
-            <p> - Cantidad de expedientes máximo por archivo: {limite}</p>
-          )}
+          {validFormat === false && <p> - Cantidad de expedientes máximo por archivo: {limite}</p>}
 
           {!uploading && contArchivoT > 0 && validFormat && (
             <>
@@ -310,13 +300,11 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
               <p>{`Cantidad de expedientes en la aplicación : ${totalDatos}`}</p>
               <p>{`Cantidad de errores en el archivo : ${errorCount}`}</p>{' '}
               {/* Mostrar la cantidad de errores */}
-              <p>{`LÍMITE DE CARTERA : ${limite}`}</p>{' '}
-              {/* Mostrar el límite de la cartera */}
+              <p>{`LÍMITE DE CARTERA : ${limite}`}</p> {/* Mostrar el límite de la cartera */}
               {totalDatos + contArchivoT > limite ? (
                 <h1>
-                  No se puede subir el archivo porque excede el límite de la
-                  cartera. Te excediste por:{' '}
-                  {contArchivoT + totalDatos - limite}
+                  No se puede subir el archivo porque excede el límite de la cartera. Te excediste
+                  por: {contArchivoT + totalDatos - limite}
                 </h1>
               ) : (
                 <Button
@@ -341,9 +329,8 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
               <thead>
                 <tr>
                   <TableColumn>
-                    Se han borrado todas las columnas que no cumplen con el
-                    formato y se descargara un excel con los errores para su
-                    analisis
+                    Se han borrado todas las columnas que no cumplen con el formato y se descargara
+                    un excel con los errores para su analisis
                   </TableColumn>
                 </tr>
               </thead>
@@ -352,9 +339,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         )}
         {expedientes.length > 0 && (
           <div className='mt-4'>
-            <h2 className='text-lg font-semibold mb-2'>
-              Expedientes Históricos:
-            </h2>
+            <h2 className='text-lg font-semibold mb-2'>Expedientes Históricos:</h2>
             <Table removeWrapper>
               <TableHeader>
                 <TableColumn>
