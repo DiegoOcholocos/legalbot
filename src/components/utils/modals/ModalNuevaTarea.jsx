@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 
@@ -28,9 +28,6 @@ import { FaSleigh } from "react-icons/fa";
 export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRol, setTareas }) {
 
   const router = useRouter();
-
-  console.log("usuarios", totalUsuarios)
-  console.log("Roles", totalRol)
   const [showNoUsersModal, setShowNoUsersModal] = useState(false);
   const [showNoRolModal, setshowNoRolModal] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -66,12 +63,10 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
 
   const handleSelectionChange = (keys) => {
-    console.log("usuarios ==>", keys);
     setSelectedKeys(keys);
     setValues({ ...values, USUARIOS: keys });
   };
   const handleSelectionChange2 = (keys) => {
-    console.log("roles ==>", keys);
     setSelectedKeys2(keys);
     setValues({ ...values, ROLES: keys });
   };
@@ -81,7 +76,6 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
   };
 
   const handleCreateTarea = async () => {
-    console.log("valores que se estan escribiendo", values)
     const { VCHNOMBRE, VCHDESCRIPCION, NUMDIASALERTA, NUMDIASDURACION } = values;
     if (!VCHNOMBRE || !VCHDESCRIPCION || !NUMDIASALERTA || !NUMDIASDURACION || selectedKeys.size === 0 || selectedKeys2.size === 0) {
       setShowWarning(true);
@@ -92,7 +86,6 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
     await handleUploadToS3(folderName);
     const res = await crearTarea(values, idActi, idFluj, folderName);
 
-    console.log(res);
     if (res) {
       setTareas((prevTareas) => [...prevTareas, res]);
     }
@@ -132,7 +125,6 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
     if (e.target.files && e.target.files.length > 0) {
       const files = e.target.files;
       setSelectedFiles(files);
-      console.log("Archivos seleccionados:", files);
 
       // Almacenar los nombres de los archivos en el estado values
       const fileNames = Array.from(files).map((file) => file.name);
@@ -167,10 +159,8 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
       try {
         const data = await s3.upload(params).promise();
-        console.log("Archivo cargado exitosamente:", data);
         uploadedNames.push(uniqueFileName); // Agregar el nombre del archivo subido al array de nombres
       } catch (error) {
-        console.error("Error al cargar el archivo a S3:", error);
       }
     }
 
@@ -180,7 +170,6 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
   const selectedUsersValue = useMemo(() => {
     const selectedUsers = Array.from(selectedKeys).map((key) => {
-      console.log("key:", key);
       const user = totalUsuarios.find((usuario) => usuario.NUMUSUARIOID === parseInt(key));
       return user ? user.VCHCORREO.split("@")[0] : "";
     });
@@ -189,7 +178,6 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
   const selectedRolesValue = useMemo(() => {
     const selectedRoles = Array.from(selectedKeys2).map((key) => {
-      console.log("key:", key);
       const rol = totalRol.find((rol) => rol.NUMROLID === parseInt(key));
       return rol?.VCHNOMBRE;
     });
