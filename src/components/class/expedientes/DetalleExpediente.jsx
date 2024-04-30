@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import Title from '@/components/utils/system/Title';
 import DetalleExpedienteTarea from './DetalleExpedienteTarea';
 import DetalleExpedienteAsignados from './DetalleExpedienteAsignados';
+import { descargarArchivo, listarArchivosCarpeta } from '@/services/Aws/S3/actions';
 
 export default function DetalleExpediente({
   expediente,
@@ -87,6 +88,17 @@ export default function DetalleExpediente({
       console.error('Error en handleAsignTask:', error);
     }
   };
+  const handleDownloadFile = async (expediente) => {
+    const empresa = process.env.CLIENTE;
+    const archivos = await listarArchivosCarpeta(
+      `expedientes/${empresa}/${expediente.ExpedienteId}/`
+    );
+    archivos.map(async (archivo) => {
+      if (!archivo.Key.includes('.json')) {
+        await descargarArchivo(archivo.Key);
+      }
+    });
+  };
 
   const handleAsignTask = async (tarea) => {
     try {
@@ -122,8 +134,11 @@ export default function DetalleExpediente({
         </Breadcrumbs>
       </div>
       <Title title={`Expediente - ${expediente.NumeroExpediente}`}>
-        <Button>Ultima Resolución</Button>
+        <Button className='py-2 px-4 rounded-md' onPress={() => handleDownloadFile(expediente)}>
+          Ultima Resolución
+        </Button>
       </Title>
+
       <div className='flex w-full flex-col px-4'>
         <Tabs aria-label='Options'>
           <Tab key='detalle' title='Detalle'>

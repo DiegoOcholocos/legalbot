@@ -27,6 +27,7 @@ export const getExpedienteJson = async (id, estudio) => {
     const expediente = JSON.parse(data.Body.toString());
     return expediente;
   } catch (error) {
+    console.log('Error al obtener expediente de S3:', error);
     const expedienteFromDB = await obtenerExpediente(estudio, id);
     return expedienteFromDB[0];
   }
