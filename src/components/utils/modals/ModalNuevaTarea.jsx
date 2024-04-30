@@ -1,5 +1,6 @@
 'use client';
 import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Modal,
   ModalContent,
@@ -14,16 +15,29 @@ import {
   DropdownMenu,
   DropdownItem,
   Checkbox,
-  select,
 } from '@nextui-org/react';
-import { crearTarea } from '@/services/Prisma/Tarea';
+import { crearTarea, obtenerTareasActividad } from '@/services/Prisma/Tarea';
+
 import AWS from 'aws-sdk';
 
 export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRol, setTareas }) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState(new Set([]));
   const [selectedKeys2, setSelectedKeys2] = useState(new Set([]));
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [tareasActividad, settareasActividad] = useState([]);
+  const [isFileCheckboxSelected, setIsFileCheckboxSelected] = useState(false);
+  const [isDependencyCheckboxSelected, setIsDependencyCheckboxSelected] = useState(false);
+
+  useEffect(() => {
+    const getTareasActividad = async (idActi) => {
+      const tareasActividad = await obtenerTareasActividad(idActi);
+      settareasActividad(tareasActividad);
+    };
+    getTareasActividad(idActi);
+  }, [idActi]);
+
   const [values, setValues] = useState({
     VCHNOMBRE: '',
     VCHDESCRIPCION: '',
@@ -31,8 +45,10 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
     NUMDIASDURACION: '',
   });
   const [isSelected, setIsSelected] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
 
   const empresa = process.env.CLIENTE;
+  const isButtonDisabled = !idActi || idActi === '';
 
   const handleSelectionChange = (keys) => {
     console.log('usuarios ==>', keys);
@@ -50,15 +66,46 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
   };
 
   const handleCreateTarea = async () => {
+    console.log('valores que se estan escribiendo', values);
+    const { VCHNOMBRE, VCHDESCRIPCION, NUMDIASALERTA, NUMDIASDURACION } = values;
+    if (
+      !VCHNOMBRE ||
+      !VCHDESCRIPCION ||
+      !NUMDIASALERTA ||
+      !NUMDIASDURACION ||
+      selectedKeys.size === 0 ||
+      selectedKeys2.size === 0
+    ) {
+      setShowWarning(true);
+      return;
+    }
+
     const folderName = Math.random().toString(36).substring(7);
     await handleUploadToS3(folderName);
     const res = await crearTarea(values, idActi, idFluj, folderName);
+
     console.log(res);
     if (res) {
-      // Verificar si res existe y tiene la propiedad 'data'
-      // Si la tarea se crea exitosamente, llamar a la función de actualización
-      setTareas((prevTareas) => [...prevTareas, res]); // Asumiendo que res.data contiene la nueva tarea creada
+      setTareas((prevTareas) => [...prevTareas, res]);
     }
+    // setIsOpen(false);
+    handleOpenModal();
+  };
+
+  const handleOpenModal = () => {
+    setSelectedKeys(new Set([]));
+    setSelectedKeys2(new Set([]));
+    setSelectedFiles([]);
+    setValues({
+      VCHNOMBRE: '',
+      VCHDESCRIPCION: '',
+      NUMDIASALERTA: '',
+      NUMDIASDURACION: '',
+    });
+    setIsSelected(false);
+    setIsDependencyCheckboxSelected(false);
+    setIsFileCheckboxSelected(false);
+    setIsOpen(!isOpen);
   };
 
   const handleFileInputChange = (e) => {
@@ -132,18 +179,50 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
   selectedRolesValue;
   return (
     <div>
-      <Button onPress={onOpen} color='danger' style={{ marginLeft: '20px' }}>
-        Crear Tarea
-      </Button>
-      <Modal isOpen={isOpen} onOpenChange={() => onOpenChange(!isOpen)} placement='top-center'>
+      {idActi && (
+        <Button
+          onPress={handleOpenModal}
+          color='danger'
+          style={{ marginLeft: '20px' }}
+          disabled={isButtonDisabled}
+        >
+          Crear Tarea
+        </Button>
+      )}
+
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={(open) => setIsOpen(open)}
+        placement='top-center'
+        size='xl'
+      >
         <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className='flex flex-col gap-1'>Nueva Tarea</ModalHeader>
-              <ModalBody>
+          <ModalHeader className='flex flex-col gap-1'>Nueva Tarea</ModalHeader>
+          <ModalBody>
+            {totalUsuarios.length === 0 && (
+              <div className='flex flex-col justify-center items-center gap-4 w-full'>
+                <p>No hay usuarios disponibles para seleccionar.</p>
+                <Button color='primary' onPress={() => router.push('/dashboard/usuarios')}>
+                  Agregar Usuarios
+                </Button>
+              </div>
+            )}
+            {totalRol.length === 0 && (
+              <div className='flex flex-col justify-center items-center gap-4 w-full'>
+                <p>No hay roles disponibles para seleccionar.</p>
+                <Button color='primary' onPress={() => router.push('/dashboard/roles')}>
+                  Agregar Roles
+                </Button>
+              </div>
+            )}
+            {showWarning && (
+              <p className='text-red-500'>Por favor, rellene todos los campos obligatorios. (*)</p>
+            )}
+            {totalUsuarios.length > 0 && totalRol.length > 0 && (
+              <>
                 <Input
                   autoFocus
-                  label='Ingrese un nombre'
+                  label='Ingrese un nombre (*)'
                   name='VCHNOMBRE'
                   variant='bordered'
                   isClearable
@@ -153,7 +232,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
 
                 <Input
                   autoFocus
-                  label='Ingrese una descripcion'
+                  label='Ingrese una descripcion (*)'
                   name='VCHDESCRIPCION'
                   variant='bordered'
                   isClearable
@@ -163,7 +242,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
                 <Input
                   type='number'
                   autoFocus
-                  label='Dias de Duracion'
+                  label='Dias de Duracion (*)'
                   name='NUMDIASDURACION'
                   variant='bordered'
                   isClearable
@@ -173,7 +252,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
                 <Input
                   type='number'
                   autoFocus
-                  label='Dias de Alerta'
+                  label='Dias de Alerta (*)'
                   name='NUMDIASALERTA'
                   variant='bordered'
                   isClearable
@@ -184,11 +263,11 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
                 <Dropdown>
                   <DropdownTrigger>
                     <Button variant='bordered' className='uppercase'>
-                      {selectedUsersValue === '' ? 'Seleccione Usuarios' : selectedUsersValue}
+                      {selectedUsersValue === '' ? 'Seleccione Usuarios (*)' : selectedUsersValue}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
-                    aria-label='Seleccione usuarios'
+                    aria-label='Seleccione usuarios*'
                     variant='flat'
                     closeOnSelect={false}
                     disallowEmptySelection={false}
@@ -207,11 +286,11 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
                 <Dropdown>
                   <DropdownTrigger>
                     <Button variant='bordered' className='uppercase'>
-                      {selectedRolesValue === '' ? 'Seleccione Usuarios' : selectedRolesValue}
+                      {selectedRolesValue === '' ? 'Seleccione Roles (*)' : selectedRolesValue}
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
-                    aria-label='Seleccione usuarios'
+                    aria-label='Seleccione Roles*'
                     variant='flat'
                     closeOnSelect={false}
                     disallowEmptySelection={false}
@@ -227,34 +306,33 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
                   </DropdownMenu>
                 </Dropdown>
 
-                <Checkbox isSelected={isSelected} onValueChange={setIsSelected}>
+                <Checkbox
+                  isSelected={isFileCheckboxSelected}
+                  onValueChange={setIsFileCheckboxSelected}
+                >
                   ¿Va a cargar archivos?
                 </Checkbox>
-                {isSelected && (
+                {isFileCheckboxSelected && (
                   <input
                     type='file'
                     name='ARCHIVOS'
                     onChange={handleFileInputChange}
-                    multiple // Agrega el atributo multiple para permitir la selección de múltiples archivos
+                    multiple // Permite la selección de múltiples archivos
                   />
                 )}
-              </ModalBody>
-              <ModalFooter>
-                <Button color='danger' variant='flat' onPress={onClose}>
-                  Cerrar
-                </Button>
-                <Button
-                  color='primary'
-                  onPress={() => {
-                    handleCreateTarea();
-                    onClose();
-                  }}
-                >
-                  Crear Tarea
-                </Button>
-              </ModalFooter>
-            </>
-          )}
+              </>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color='danger' variant='flat' onPress={() => setIsOpen(false)}>
+              Cerrar
+            </Button>
+            {totalUsuarios.length > 0 && totalRol.length > 0 && (
+              <Button color='primary' onPress={handleCreateTarea}>
+                Crear Tarea
+              </Button>
+            )}
+          </ModalFooter>
         </ModalContent>
       </Modal>
     </div>
