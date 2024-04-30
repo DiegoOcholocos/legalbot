@@ -1,7 +1,7 @@
 'use server';
 import db from '@/libs/prisma';
 
-async function createDependenciaTarea(data) {
+export async function createDependenciaTarea(data) {
   try {
     const nuevaDependencia = await db.TE_DEPENDENCIATAREA.create({
       data: {
@@ -16,7 +16,7 @@ async function createDependenciaTarea(data) {
 }
 
 
-async function getDependenciaTareaById(id) {
+export async function getDependenciaTareaById(id) {
   try {
     const dependencia = await db.TE_DEPENDENCIATAREA.findUnique({
       where: {
@@ -30,7 +30,7 @@ async function getDependenciaTareaById(id) {
 }
 
 
-async function updateDependenciaTarea(id, newData) {
+export async function updateDependenciaTarea(id, newData) {
   try {
     const dependenciaActualizada = await db.TE_DEPENDENCIATAREA.update({
       where: {
@@ -47,7 +47,7 @@ async function updateDependenciaTarea(id, newData) {
   }
 }
 
-async function deleteDependenciaTarea(id) {
+export async function deleteDependenciaTarea(id) {
   try {
     await db.TE_DEPENDENCIATAREA.delete({
       where: {
@@ -60,7 +60,7 @@ async function deleteDependenciaTarea(id) {
   }
 }
 
-async function createDependenciaExpedienteTarea(data) {
+export async function createDependenciaExpedienteTarea(data) {
   try {
     const nuevaDependencia = await db.PRUEBAS.TE_DEPENDENCIASEXPEDIENTETAREA.create({
       data: {
@@ -76,7 +76,7 @@ async function createDependenciaExpedienteTarea(data) {
 }
 
 
-async function getDependenciaExpedienteTareaById(id) {
+export async function getDependenciaExpedienteTareaById(id) {
   try {
     const dependencia = await db.PRUEBAS.TE_DEPENDENCIASEXPEDIENTETAREA.findUnique({
       where: {
@@ -90,7 +90,7 @@ async function getDependenciaExpedienteTareaById(id) {
 }
 
 
-async function updateDependenciaExpedienteTarea(id, newData) {
+export async function updateDependenciaExpedienteTarea(id, newData) {
   try {
     const dependenciaActualizada = await db.PRUEBAS.TE_DEPENDENCIASEXPEDIENTETAREA.update({
       where: {
@@ -109,7 +109,7 @@ async function updateDependenciaExpedienteTarea(id, newData) {
 }
 
 
-async function deleteDependenciaExpedienteTarea(id) {
+export async function deleteDependenciaExpedienteTarea(id) {
   try {
     await db.PRUEBAS.TE_DEPENDENCIASEXPEDIENTETAREA.delete({
       where: {
