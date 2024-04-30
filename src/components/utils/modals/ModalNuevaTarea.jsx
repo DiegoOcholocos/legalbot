@@ -96,10 +96,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
     if (res) {
       setTareas((prevTareas) => [...prevTareas, res]);
     }
-    console.log(typeof (res.NUMTAREAID));
-    console.log("id tarea depende", typeof (IdDependencia))
-
-    setIsOpen(false);
+    // setIsOpen(false);
     handleOpenModal();
   };
 
@@ -127,7 +124,7 @@ export default function ModalNuevaTarea({ idActi, idFluj, totalUsuarios, totalRo
     setIsSelected(false);
     setIsDependencyCheckboxSelected(false);
     setIsFileCheckboxSelected(false);
-    setIsOpen(true);
+    setIsOpen(!isOpen);
   };
 
 
