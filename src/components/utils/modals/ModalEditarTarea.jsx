@@ -68,6 +68,7 @@ export default function ModalEditarTarea({
         try {
           const archivo = await extraccionarchivosS3(Tarea.VCHARCHIVOS);
           setArchivoObtenido(archivo);
+          
         } catch (error) {
           console.error('Error al obtener archivos:', error);
         }
@@ -210,6 +211,7 @@ export default function ModalEditarTarea({
 
     return selectedRoles.join(', ');
   }, [selectedKeys2]);
+  
   const handleDownloadFile = async (archivo) => {
     const params = {
       Bucket: 'expedientespjvf',
