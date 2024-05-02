@@ -12,9 +12,11 @@ import { useRouter } from 'next/navigation';
 import Acciones from '@/components/utils/system/Acciones';
 import { FaEye } from 'react-icons/fa6';
 
-export default function TablaExpedientes({ expedientesFilter }) {
+export default function TablaExpedientes({ expedientesFilter}) {
+
   const router = useRouter();
   const detalleExpediente = (ExpedienteId) => {
+    localStorage.setItem('expedienteSelect', ExpedienteId);
     router.push(`/dashboard/expedientes/${ExpedienteId}`);
   };
   return (
@@ -22,7 +24,7 @@ export default function TablaExpedientes({ expedientesFilter }) {
       removeWrapper
       color='default'
       selectionMode='single'
-      defaultSelectedKeys={[]}
+      defaultSelectedKeys={[localStorage.getItem('expedienteSelect')]}
       className='overflow-x-auto overflow-y-hidden'
     >
       <TableHeader>

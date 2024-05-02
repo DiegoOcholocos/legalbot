@@ -24,7 +24,8 @@ const ESTADOS_EX = {
 };
 const ListadoExpedientes = ({ estudio }) => {
   const [expedientesFilter, setExpedientesFilter] = useState([]);
-  const [numPage, setNumPage] = useState(1);
+  const [numPage, setNumPage] = useState(parseInt(localStorage.getItem('paginaActual') || '1'));
+
   const [totalDatos, setTotalDatos] = useState(0);
   const [searchTerm, setSearchTerm] = useState({
     term: '',
@@ -38,7 +39,7 @@ const ListadoExpedientes = ({ estudio }) => {
       const count = await obtenerCountExpediente(searchTerm, estudio);
       setTotalDatos(count);
       const expedientes = await obtenerExpedientePage(
-        1,
+        numPage,
         searchTerm,
         10,
         estudio
@@ -53,6 +54,7 @@ const ListadoExpedientes = ({ estudio }) => {
     const fetchData = async () => {
       setEstadoExtraccion(ESTADOS_EX.EN_PROCESO);
       setExpedientesFilter([]);
+      
       const expedientes = await obtenerExpedientePage(
         numPage,
         searchTerm,
@@ -64,6 +66,7 @@ const ListadoExpedientes = ({ estudio }) => {
     };
     fetchData();
   }, [numPage]);
+
   const filtrarExpedientes = async () => {
     setEstadoExtraccion(ESTADOS_EX.EN_PROCESO);
     setExpedientesFilter([]);
@@ -82,6 +85,11 @@ const ListadoExpedientes = ({ estudio }) => {
     }
   };
 
+  const handlePageChange = (ActualPag) => {
+    console.log("Acp :",ActualPag)
+    setNumPage(ActualPag);
+    localStorage.setItem('paginaActual', ActualPag.toString());
+  };
   const rowsPerPage = 10;
   const totalPages = Math.ceil(totalDatos / rowsPerPage);
 
@@ -140,7 +148,7 @@ const ListadoExpedientes = ({ estudio }) => {
       </Card>
       <Card className='p-4 flex-1 m-4 flex flex-col gap-4'>
         <h3 className='font-semibold'>Total de Expedientes : {totalDatos}</h3>
-        <TablaExpedientes expedientesFilter={expedientesFilter} />
+        <TablaExpedientes expedientesFilter={expedientesFilter}  />
         {
           <>
             {estadoExtraccion === ESTADOS_EX.EN_PROCESO ? (
@@ -170,11 +178,11 @@ const ListadoExpedientes = ({ estudio }) => {
                 className='flex w-full justify-center -z-0 '
                 isCompact
                 showShadow
-                initialPage={1}
+                initialPage={numPage}
                 color='primary'
                 page={numPage}
                 total={totalPages}
-                onChange={(numPage) => setNumPage(numPage)}
+                onChange={handlePageChange}
               />
             )}
           </>
