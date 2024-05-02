@@ -34,7 +34,7 @@ export default function ModalRoles({
   }, [editData]);
 
   const saveAction = async () => {
-    if (!data.VCHNOMBRE) { 
+    if (!data.VCHNOMBRE) {
       setIsValid(false);
       return;
     }
@@ -49,9 +49,7 @@ export default function ModalRoles({
     }
     if (mode === 'Editar') {
       const res = await editarRol(data);
-      const roles = rolesTotales.filter(
-        (rol) => rol.NUMROLID !== data.NUMROLID
-      );
+      const roles = rolesTotales.filter((rol) => rol.NUMROLID !== data.NUMROLID);
       if (res) {
         setRolesTotales([...roles, res]);
         onOpenChange();
@@ -61,9 +59,7 @@ export default function ModalRoles({
     }
     if (mode === 'Eliminar') {
       const res = await eliminarRol(data.NUMROLID);
-      const roles = rolesTotales.filter(
-        (rol) => rol.NUMROLID !== data.NUMROLID
-      );
+      const roles = rolesTotales.filter((rol) => rol.NUMROLID !== data.NUMROLID);
       if (res) {
         setRolesTotales(roles);
         onOpenChange();

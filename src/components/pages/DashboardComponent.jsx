@@ -35,9 +35,7 @@ export default function DashboardComponent({ estudio }) {
       const dataUsuarios = await listarUsuarios();
       const valuesUsuarios = labels.map((item) => {
         return dataUsuarios.filter(
-          (user) =>
-            user.Attributes[1].Value === item &&
-            user.Attributes[3].Value != 'Administrador'
+          (user) => user.Attributes[1].Value === item && user.Attributes[3].Value != 'Administrador'
         ).length;
       });
       setEstados({ labelsEstados, valuesEstados });
@@ -62,9 +60,7 @@ export default function DashboardComponent({ estudio }) {
             values={estados.valuesEstados}
             labels={estados.labelsEstados}
             title={'Procesos por etapa'}
-            descripcion={
-              'Indicar la cantidad de procesos que se encuentran en cada etapa'
-            }
+            descripcion={'Indicar la cantidad de procesos que se encuentran en cada etapa'}
           />
         </Card>
         <Card className='col-span-1 md:col-span-2 order-4 flex-1 w-full h-[40vh]'>
@@ -72,9 +68,7 @@ export default function DashboardComponent({ estudio }) {
             values={cuantia.valuesCuantia}
             labels={cuantia.labelsCuantia}
             title={'Procesos por etapa'}
-            descripcion={
-              'Indicar la cantidad de procesos que se encuentran en cada etapa'
-            }
+            descripcion={'Indicar la cantidad de procesos que se encuentran en cada etapa'}
           />
         </Card>
         {estudio == 'Administrador' && (
@@ -84,9 +78,7 @@ export default function DashboardComponent({ estudio }) {
                 values={estudios.values}
                 labels={estudios.labels}
                 title={'Procesos por etapa'}
-                descripcion={
-                  'Indicar la cantidad de procesos que se encuentran en cada etapa'
-                }
+                descripcion={'Indicar la cantidad de procesos que se encuentran en cada etapa'}
                 tipo={'x'}
               />
             </Card>
@@ -95,9 +87,7 @@ export default function DashboardComponent({ estudio }) {
                 values={usuarios.valuesUsuarios}
                 labels={usuarios.labels}
                 title={'Procesos por etapa'}
-                descripcion={
-                  'Indicar la cantidad de procesos que se encuentran en cada etapa'
-                }
+                descripcion={'Indicar la cantidad de procesos que se encuentran en cada etapa'}
                 tipo={'x'}
               />
             </Card>

@@ -22,12 +22,7 @@ export default function TablaTareas({ tareas, setTareas, usuarios, roles }) {
   };
   return (
     <>
-      <Table
-        removeWrapper
-        color='default'
-        selectionMode='single'
-        defaultSelectedKeys={[]}
-      >
+      <Table removeWrapper color='default' selectionMode='single' defaultSelectedKeys={[]}>
         <TableHeader className='text-center'>
           <TableColumn>Nombre Tarea</TableColumn>
           <TableColumn>Descripcion</TableColumn>
@@ -64,9 +59,7 @@ export default function TablaTareas({ tareas, setTareas, usuarios, roles }) {
           <ModalEliminarTarea
             Tarea={tarea}
             updateTareas={() => {
-              const updatedTareas = tareas.filter(
-                (t) => t.NUMTAREAID !== tarea.NUMTAREAID
-              );
+              const updatedTareas = tareas.filter((t) => t.NUMTAREAID !== tarea.NUMTAREAID);
               setTareas(updatedTareas);
             }}
             isOpen={eliminar.isOpen}
