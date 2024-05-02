@@ -7,11 +7,14 @@ import Title from '@/components/utils/system/Title';
 
 export default function DetalleExpedienteAsignados({ expediente, tareas }) {
   const [tareasExpediente, setTareasExpediente] = useState(tareas);
-
+  const handleTareasUpdate = (nuevasTareas) => {
+    setTareasExpediente(nuevasTareas);
+  };
+  
   return (
     <>
       <Title title={'Tareas asignadas al expediente'} size='2xl'></Title>
-      <PresentacionTareas tareas={tareas} />
+      <PresentacionTareas tareas={tareas} onUpdate={handleTareasUpdate} />
     </>
   );
 }
