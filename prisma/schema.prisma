@@ -204,7 +204,6 @@ model TE_EXPEDIENTE_TAREA {
   @@index([expedienteid], name: "te_expediente_tarea_expedienteid_index")
 }
 
-// TE_DEPENDENCIASEXPEDIENTETAREA model
 model TE_DEPENDENCIASEXPEDIENTETAREA {
   NUMDEPENDENCIASEXPEDIENTETAREAID Int     @id @default(autoincrement())
   NUMEXPEDTAREAID                  Int?
@@ -213,4 +212,31 @@ model TE_DEPENDENCIASEXPEDIENTETAREA {
 
   TE_EXPEDIENTE_TAREA TE_EXPEDIENTE_TAREA? @relation(fields: [NUMEXPEDTAREAID], references: [NUMEXPEDTAREAID])
   TE_DEPENDENCIATAREA TE_DEPENDENCIATAREA? @relation(fields: [NUMDEPENDENCIASTAREAID], references: [NUMDEPENDENCIASTAREAID])
+}
+
+model TE_HISTORIALDOCS {
+  NUMHISTORIALDOCSID Int     @id @default(autoincrement())
+  VCHNOMDOC          String?
+  VCHCANTEXP         String?
+  VCHESTADO          String?
+  VCHFECHACARDA      String?
+}
+
+model TE_ROL {
+  NUMROLID             Int       @id @default(autoincrement())
+  NUMTAREAID           Int?
+  NUMUSUARIOID         Int?
+  VCHNOMBRE            String?
+  FECFECHACREACION     DateTime?
+  FECFECHACTUALIZACION DateTime?
+  NUMEXPEDIENTEID      String?
+}
+
+model TE_USUARIO {
+  NUMUSUARIOID  Int     @id @default(autoincrement())
+  VCHCORREO     String?
+  VCHESTADO     String?
+  VCHFECHA      String?
+  VCHTIPUSUARIO String?
+  VCHROLID      Int?
 }

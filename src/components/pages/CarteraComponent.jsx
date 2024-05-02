@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState,useRef } from 'react';
 import {
   Card,
   Button,
@@ -22,6 +22,7 @@ import {
   obtenerExpedienteHisto,
 } from '@/services/Prisma/HistorialDocumentos';
 import Title from '../utils/system/Title';
+import ModalCarteraAlerta from '@/components/utils/modals/ModalCarteraAlerta';
 
 const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   const [excelData, setExcelData] = useState([]);
@@ -37,6 +38,8 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   const [contArchivoT, setContArchivoT] = useState(0);
   const [porcentaje, setPorcentaje] = useState(0);
   const limite = process.env.LIMIT_WALLET;
+  const inputFileRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
 
   const validarFormatoExcel = (worksheet) => {
     if (!worksheet || worksheet.rowCount < 1) {
@@ -252,14 +255,32 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         setExpedientes(expedientesData);
 
         setUploadCompleted(true); // Indica que la carga ha finalizado
+        window.alert("✔️✔️✔️  Sus expedientes se han subido satisfactoriamente  ✔️✔️✔️");
       } catch (error) {
         console.error('Error al subir el archivo a S3:', error);
+        window.alert("❌❌❌  Ocurrio un error al subir los expedientes  ❌❌❌");
       } finally {
-        setUploading(false); // Asegúrate de que incluso si hay un error, uploading se establezca en false
+        setUploading(false);
+        // Limpiar el contenido una vez que se ha cargado
+        setExcelData([]);
+        setValidFormat(null);
+        setUploadCompleted(false);
+        setErrors([]);
+        setErrorCount(0);
+        setTotalDatos(0);
+        setContArchivoT(0);
+        setPorcentaje(0);
+        setIdArchivo('');
+        handleResetFileInput();
+        setShowModal(true);
       }
     } else {
       console.log('No hay datos válidos para subir a S3.');
     }
+  };
+
+  const handleResetFileInput = () => {
+    inputFileRef.current.value = null;
   };
 
   return (
@@ -279,44 +300,45 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
               type='file'
               accept='.xlsx, .xls'
               onChange={handleFileUpload}
+              ref={inputFileRef} 
             />
             <p class='text-sm text-gray-400 p-2' id='file_input'>
-              Solo se aceptan archivos de tipo XLSX o XLS.
+              Solo se aceptan archivos de tipo XLSX o XLS.   ❗
             </p>
           </div>
         </div>
         <h3>
           Porcentaje de Expedientes Subidos :
-          {porcentaje ? porcentaje + '%' : '0%'}
+          {porcentaje ? porcentaje + '%' : '0%'}   ⌛
         </h3>
         <div className='flex flex-col gap-1 px-2 '>
           {uploading && <p> - Subiendo a la nube...</p>}
           {uploadCompleted && (
-            <p> - La carga a la Nube se ha completado exitosamente.</p>
+            <p> - La carga a la Nube se ha completado exitosamente.   ✔️</p>
           )}
-          {uploading ? <p>Subiendo...</p> : null}
+          {uploading ? <p>Subiendo...   ⌛</p> : null}
           {validFormat === false && (
             <p>
-              - Formato de Excel no válido. Por favor, verifica la estructura.
+              - Formato de Excel no válido. Por favor, verifica la estructura.   ❌
             </p>
           )}
           {validFormat === false && (
-            <p> - Cantidad de expedientes máximo por archivo: {limite}</p>
+            <p> - Cantidad de expedientes máximo por archivo: {limite}   ❌</p>
           )}
 
           {!uploading && contArchivoT > 0 && validFormat && (
             <>
-              <p>{`Cantidad de expedientes en el archivo : ${contArchivoT}`}</p>
-              <p>{`Cantidad de expedientes en la aplicación : ${totalDatos}`}</p>
-              <p>{`Cantidad de errores en el archivo : ${errorCount}`}</p>{' '}
+              <p>{`Cantidad de expedientes en el archivo : ${contArchivoT}`}   ✔️</p>
+              <p>{`Cantidad de expedientes en la aplicación : ${totalDatos}`}   ✔️</p>
+              <p>{`Cantidad de errores en el archivo : ${errorCount}`}   ✔️</p>
               {/* Mostrar la cantidad de errores */}
-              <p>{`LÍMITE DE CARTERA : ${limite}`}</p>{' '}
+              <p>{`LÍMITE DE CARTERA : ${limite}`}   ✔️</p>
               {/* Mostrar el límite de la cartera */}
               {totalDatos + contArchivoT > limite ? (
                 <h1>
                   No se puede subir el archivo porque excede el límite de la
                   cartera. Te excediste por:{' '}
-                  {contArchivoT + totalDatos - limite}
+                  {contArchivoT + totalDatos - limite}   ❌
                 </h1>
               ) : (
                 <Button
@@ -384,6 +406,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
           </div>
         )}
       </Card>
+      <ModalCarteraAlerta open={showModal} onClose={() => setShowModal(false)} />
     </>
   );
 };
