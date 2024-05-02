@@ -341,13 +341,17 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
                   {contArchivoT + totalDatos - limite}   ❌
                 </h1>
               ) : (
-                <Button
-                  onClick={handleShowExcel}
-                  className='w-full'
-                  disabled={uploading || contArchivoT + totalDatos > limite}
-                >
-                  Subir expedientes
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    radius="full"
+                    onClick={handleShowExcel}
+                    className="w-40 bg-gradient-to-tr from-blue-500 to-cyan-500 text-white shadow-lg"
+                    we
+                    disabled={uploading || contArchivoT + totalDatos > limite}
+                  >
+                    Subir expedientes
+                  </Button>
+                </div>
               )}
             </>
           )}
@@ -397,7 +401,14 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
                   <TableRow key={expediente.NUMHISTORIALDOCSID}>
                     <TableCell>{expediente.VCHNOMDOC}</TableCell>
                     <TableCell>{expediente.VCHCANTEXP}</TableCell>
-                    <TableCell>{expediente.VCHESTADO}</TableCell>
+                    <TableCell>
+                      {expediente.VCHESTADO === 'Cargado' && (
+                        <span role="img" aria-label="check">Cargado ✔️</span>
+                      )}
+                      {expediente.VCHESTADO === 'No Cargado' && (
+                        <span role="img" aria-label="check">No Cargado ❌</span>
+                      )}
+                    </TableCell>
                     <TableCell>{expediente.VCHFECHACARDA}</TableCell>
                   </TableRow>
                 ))}
