@@ -21,6 +21,7 @@ export const menu = [
         href: '/dashboard',
       },
     ],
+    permisos: ['Administrador','usuario_interno','usuario_externo']
   },
   {
     nombre: 'Expedientes',
@@ -31,6 +32,7 @@ export const menu = [
         href: '/dashboard/expedientes',
       },
     ],
+    permisos: ['Administrador','usuario_interno','usuario_externo']
   },
   {
     nombre: 'Dashboard',
@@ -41,6 +43,7 @@ export const menu = [
         href: '/dashboard/reportes',
       },
     ],
+    permisos: ['Administrador','usuario_interno','usuario_externo']
   },
   {
     nombre: 'Cartera',
@@ -51,6 +54,7 @@ export const menu = [
         href: '/dashboard/cartera',
       },
     ],
+    permisos: ['Administrador','usuario_interno']
   },
   {
     nombre: 'Usuarios',
@@ -61,6 +65,7 @@ export const menu = [
         href: '/dashboard/usuarios',
       },
     ],
+    permisos: ['Administrador']
   },
   {
     nombre: 'Estudios',
@@ -71,6 +76,7 @@ export const menu = [
         href: '/dashboard/estudios',
       },
     ],
+    permisos: ['Administrador','usuario_interno']
   },
   {
     nombre: 'Roles',
@@ -81,6 +87,7 @@ export const menu = [
         href: '/dashboard/roles',
       },
     ],
+    permisos: ['Administrador','usuario_interno']
   },
   {
     nombre: 'Flujos',
@@ -91,6 +98,7 @@ export const menu = [
         href: '/dashboard/flujos',
       },
     ],
+    permisos: ['Administrador','usuario_interno']
   },
 ];
 
