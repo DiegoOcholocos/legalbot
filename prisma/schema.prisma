@@ -13,123 +13,143 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Expediente model
 model Expediente {
-  ExpedienteId                    String    @id @unique
-  NumeroExpediente              String?
-  ResumenUltimaResolucion       String?
-  Observacion                   String?
-  FechaConclucion               String?
-  EtapaProcesal                 String?
-  OrganoJurisdiccional          String?
-  Ubicacion                     String?
-  Estado                        String?
-  Proceso                       String?
-  MotivoConclucion              String?
-  Juez                          String?
-  EspecialistaLegal             String?
-  FechaInicio                   String?
-  DistritoJudicial              String?
-  Sumilla                       String?
-  Materias                      String?
-  Especialidad                  String?
-  Demanda                       String?
-  RazonSocial                   String?
-  Estudio                       String?
-  Ruc                           String?
-  Cuantia                       Float?
-  CodEstudio                    String?
-  UltimaClasificacion           String?
-  CodigoUltimaClasificacion     String?
-  FechaUltimaClasificacion      String?
-  MovimientoUltimaClasificacion String?
-  ClasificacionPriorizada       String?
-  CodigoClasificacionPriorizada String?
-  FechaClasificacionPriorizada  String?
+  ExpedienteId                      String  @id
+  NumeroExpediente                  String
+  ResumenUltimaResolucion           String?
+  Observacion                       String?
+  FechaConclucion                   String?
+  EtapaProcesal                     String?
+  OrganoJurisdiccional              String?
+  Ubicacion                         String?
+  Estado                            String?
+  Proceso                           String?
+  MotivoConclucion                  String?
+  Juez                              String?
+  EspecialistaLegal                 String?
+  FechaInicio                       String?
+  DistritoJudicial                  String?
+  Sumilla                           String?
+  Materias                          String?
+  Especialidad                      String?
+  Demanda                           String?
+  RazonSocial                       String?
+  Estudio                           String?
+  Ruc                               String?
+  Cuantia                           Float?
+  CodEstudio                        String?
+  UltimaClasificacion               String?
+  CodigoUltimaClasificacion         String?
+  FechaUltimaClasificacion          String?
+  MovimientoUltimaClasificacion     String?
+  ClasificacionPriorizada           String?
+  CodigoClasificacionPriorizada     String?
+  FechaClasificacionPriorizada      String?
   MovimientoClasificacionPriorizada String?
-  CompararDemandado             String?
-  Demandado                     String?
-  Date                          String?
-  FechaPresentacion             String?
-  Grupo                         String?
-  Criticos                      String?
-  Zona                          String?
-  FechaUltimaSincronizacion     String?
-  FechaUltimaActualizacion      String?
-  NumeroSincronizaciones        Float?
-  CodigoCliente                 String?
-  NombreCliente                 String?
-  BUFFER01                      String?
-  BUFFER02                      String?
-  BUFFER03                      String?
-  NUMESTADOREGISTRO             Float?
-  VCHTIPOSINCRONIZACION         String?
-  NUMHISTORIALDOCSID            Int?
-  FECINSERCION                  String?
-  VCHTIPOCARGA                  String?
+  CompararDemandado                 String?
+  Demandado                         String?
+  FechaPresentacion                 String?
+  Date                              String?
+  Grupo                             String?
+  Criticos                          String?
+  Zona                              String?
+  FechaUltimaSincronizacion         String?
+  FechaUltimaActualizacion          String?
+  NumeroSincronizaciones            Float?  @default(0)
+  CodigoCliente                     String?
+  NombreCliente                     String?
+  BUFFER01                          String?
+  BUFFER02                          String?
+  BUFFER03                          String?
+  NUMESTADOREGISTRO                 Float?
+  VCHTIPOSINCRONIZACION             String?
+  NUMHISTORIALDOCSID                Int?
+  FECINSERCION                      String?
+  VCHTIPOCARGA                      String?
+
+  TE_CARGAS_TE_EXPEDIENTE_TAREA TE_CARGAS[]
+  TE_EXPEDIENTE_TAREA           TE_EXPEDIENTE_TAREA[]
 }
 
+// TE_CARGAS model
+// TE_CARGAS model
+model TE_CARGAS {
+  NUMCARGASID          Int       @id @default(autoincrement())
+  VCHDEMANDA           String?
+  VCHCODIGOEXPEDIENTE  String?
+  VCHRUC               String?
+  VCHRAZONSOCIAL       String?
+  VCHCODIGOESTUDIO     String?
+  VCHESTUDIO           String?
+  VCHCUANTIA           String?
+  VCHFECHAPRESENTACION DateTime?
+  INTANO               Int?
+  VCHGRUPO             String?
+  VCHCRITICOS          String?
+  VCHZONA              String?
+  VCHCODIGOCLIENTE     String?
+  VCHNOMBRECLIENTES    String?
+  VCHBUFFER01          String?
+  VCHBUFFER02          String?
+  VCHBUFFER03          String?
+
+  // Removed relation with TE_EXPEDIENTE_TAREA
+  Expediente          Expediente?           @relation(fields: [VCHCODIGOEXPEDIENTE], references: [ExpedienteId])
+  TE_EXPEDIENTE_TAREA TE_EXPEDIENTE_TAREA[]
+}
+
+// TE_ESTUDIO model
 model TE_ESTUDIO {
-  NUMESTUDIOID Int      @id @default(autoincrement())
+  NUMESTUDIOID Int     @id @default(autoincrement())
   VCHNOMBRE    String?
-  // Agrega el campo de relación opuesto
-  TE_ESTUDIO_USUARIO TE_ESTUDIO_USUARIO[]
+  VCHNOMBRECOD String?
 
-  @@map("TE_ESTUDIO")
+  TE_ESTUDIO_USUARIO TE_ESTUDIO_USUARIO[]
 }
 
-model TE_USUARIO {
-  NUMUSUARIOID Int      @id @default(autoincrement())
-  VCHCORREO    String
-  VCHESTADO    String?
-  VCHFECHA     String?
-  VCHTIPUSUARIO String?
-  VCHROLID Int?
-  // Agrega el campo de relación opuesto
-  TE_ESTUDIO_USUARIO TE_ESTUDIO_USUARIO[]
-
-  @@map("TE_USUARIO")
-}
-
+// TE_ESTUDIO_USUARIO model
 model TE_ESTUDIO_USUARIO {
-  NUMUSUARIOID_id Int
-  NUMESTUDIOID_id Int
-  
+  NUMUSUARIOID_id        Int
+  NUMESTUDIOID_id        Int
+  TE_ESTUDIO             TE_ESTUDIO? @relation(fields: [tE_ESTUDIONUMESTUDIOID], references: [NUMESTUDIOID])
+  tE_ESTUDIONUMESTUDIOID Int?
+
   @@id([NUMESTUDIOID_id, NUMUSUARIOID_id])
-  @@map("TE_ESTUDIO_USUARIO")
-  
-  // Define la relación con TE_ESTUDIO
-  NUMESTUDIOID TE_ESTUDIO   @relation(fields: [NUMESTUDIOID_id], references: [NUMESTUDIOID])
-  
-  // Define la relación con TE_USUARIO
-  NUMUSUARIOID TE_USUARIO   @relation(fields: [NUMUSUARIOID_id], references: [NUMUSUARIOID])
 }
 
-model TE_HISTORIALDOCS {
-  NUMHISTORIALDOCSID Int      @id @default(autoincrement())
-  VCHNOMDOC     String?
-  VCHCANTEXP    String?
-  VCHESTADO     String?
-  VCHFECHACARDA String?
+// TE_FLUJO model
+model TE_FLUJO {
+  NUMFLUJOID               Int       @id @default(autoincrement())
+  VCHNOMBRE                String?
+  FECFECHACREACION         DateTime?
+  VCHUSUARIOCREACION       String?
+  NUMCANTIDADDEEXPEDIENTES Int?
+  FECFECHACTUALIZACION     DateTime?
+  VCHUSUARIOACTUALIZ       String?
+
+  TE_ACTIVIDAD TE_ACTIVIDAD[]
+  TE_TAREA     TE_TAREA[]
 }
 
+// TE_ACTIVIDAD model
+model TE_ACTIVIDAD {
+  NUMACTIVIDADID       Int       @id @default(autoincrement())
+  NUMFLUJOID           Int?
+  VCHNOMBRE            String?
+  NUMNUMORDEN          Int?
+  FECFECHACREACION     DateTime?
+  VCHUSUARIOCREACION   String?
+  FECFECHACTUALIZACION DateTime?
+  VCHUSUARIOACTUALIZ   String?
 
-
-
-
-model TE_EXPEDIENTE_TAREA {
-  FECHFECHACREACION   DateTime?
-  FECFECHACULMINACION DateTime?
-  FECHAINICIO          DateTime?
-  expedienteid         String?
-  NUMTAREAID           Int?
-  VCHESTADO            String?
-  NUMEXPEDTAREAID      Int       @id @default(autoincrement())
-  BOOLTERMINADO        Boolean   @default(false)
-  TE_TAREA             TE_TAREA? @relation(fields: [NUMTAREAID], references: [NUMTAREAID])
+  TE_FLUJO TE_FLUJO?  @relation(fields: [NUMFLUJOID], references: [NUMFLUJOID])
+  TE_TAREA TE_TAREA[]
 }
 
+// TE_TAREA model
 model TE_TAREA {
-  NUMTAREAID           Int        @id @default(autoincrement())
+  NUMTAREAID           Int       @id @default(autoincrement())
   NUMFLUJOID           Int?
   NUMACTIVIDADID       Int?
   VCHNOMBRE            String?
@@ -146,40 +166,77 @@ model TE_TAREA {
   FECFECHAFINAL        DateTime?
   VCHROLES             String?
   VCHARCHIVOS          String?
-  TE_EXPEDIENTE_TAREA  TE_EXPEDIENTE_TAREA[]
-  TE_ACTIVIDAD         TE_ACTIVIDAD? @relation(fields: [NUMACTIVIDADID], references: [NUMACTIVIDADID])
+
+  TE_FLUJO     TE_FLUJO?     @relation(fields: [NUMFLUJOID], references: [NUMFLUJOID])
+  TE_ACTIVIDAD TE_ACTIVIDAD? @relation(fields: [NUMACTIVIDADID], references: [NUMACTIVIDADID])
+
+  TE_DEPENDENCIATAREA TE_DEPENDENCIATAREA[]
+  TE_EXPEDIENTE_TAREA TE_EXPEDIENTE_TAREA[]
 }
 
-model TE_ACTIVIDAD {
-  NUMACTIVIDADID       Int       @id @default(autoincrement())
-  NUMFLUJOID           Int?
-  VCHNOMBRE            String?
-  NUMNUMORDEN          Int?
-  FECFECHACREACION     DateTime?
-  VCHUSUARIOCREACION   String?
-  FECFECHACTUALIZACION DateTime?
-  VCHUSUARIOACTUALIZ   String?
-  TE_TAREA             TE_TAREA[] // Relación inversa con TE_TAREA
+// TE_DEPENDENCIATAREA model
+model TE_DEPENDENCIATAREA {
+  NUMDEPENDENCIASTAREAID Int  @id @default(autoincrement())
+  NUMTAREAID             Int?
+  NUMTAREAIDDEPENDENCIA  Int?
+
+  TE_TAREA                       TE_TAREA?                        @relation(fields: [NUMTAREAID], references: [NUMTAREAID])
+  TE_DEPENDENCIASEXPEDIENTETAREA TE_DEPENDENCIASEXPEDIENTETAREA[]
 }
 
-// Modelo para TE_FLUJO
-model TE_FLUJO {
-  NUMFLUJOID             Int       @id @default(autoincrement())
-  VCHNOMBRE              String?
-  FECFECHACREACION       DateTime?
-  VCHUSUARIOCREACION     String?
-  NUMCANTIDADDEEXPEDIENTES Int?
-  FECFECHACTUALIZACION    DateTime?
-  VCHUSUARIOACTUALIZ     String?
+// TE_EXPEDIENTE_TAREA model
+model TE_EXPEDIENTE_TAREA {
+  FECHFECHACREACION   DateTime?
+  FECFECHACULMINACION DateTime?
+  FECHAINICIO         DateTime?
+  expedienteid        String?
+  NUMTAREAID          Int?
+  VCHESTADO           String?
+  NUMEXPEDTAREAID     Int       @id @default(autoincrement())
+  BOOLTERMINADO       Boolean
+
+  Expediente                     Expediente?                      @relation(fields: [expedienteid], references: [ExpedienteId])
+  TE_TAREA                       TE_TAREA?                        @relation(fields: [NUMTAREAID], references: [NUMTAREAID])
+  TE_CARGAS                      TE_CARGAS?                       @relation(fields: [tE_CARGASNUMCARGASID], references: [NUMCARGASID])
+  tE_CARGASNUMCARGASID           Int?
+  TE_DEPENDENCIASEXPEDIENTETAREA TE_DEPENDENCIASEXPEDIENTETAREA[]
+
+  @@index([expedienteid], name: "te_expediente_tarea_expedienteid_index")
 }
 
+model TE_DEPENDENCIASEXPEDIENTETAREA {
+  NUMDEPENDENCIASEXPEDIENTETAREAID Int     @id @default(autoincrement())
+  NUMEXPEDTAREAID                  Int?
+  NUMDEPENDENCIASTAREAID           Int?
+  STRINGESTADO                     String?
+
+  TE_EXPEDIENTE_TAREA TE_EXPEDIENTE_TAREA? @relation(fields: [NUMEXPEDTAREAID], references: [NUMEXPEDTAREAID])
+  TE_DEPENDENCIATAREA TE_DEPENDENCIATAREA? @relation(fields: [NUMDEPENDENCIASTAREAID], references: [NUMDEPENDENCIASTAREAID])
+}
+
+model TE_HISTORIALDOCS {
+  NUMHISTORIALDOCSID Int     @id @default(autoincrement())
+  VCHNOMDOC          String?
+  VCHCANTEXP         String?
+  VCHESTADO          String?
+  VCHFECHACARDA      String?
+}
 
 model TE_ROL {
-  NUMROLID            Int       @id @default(autoincrement())
-  NUMTAREAID          Int?
-  NUMUSUARIOID        Int?
-  VCHNOMBRE           String?
-  FECFECHACREACION    DateTime?
+  NUMROLID             Int       @id @default(autoincrement())
+  NUMTAREAID           Int?
+  NUMUSUARIOID         Int?
+  VCHNOMBRE            String?
+  FECFECHACREACION     DateTime?
   FECFECHACTUALIZACION DateTime?
-  NUMEXPEDIENTEID     String?
+  NUMEXPEDIENTEID      String?
+}
+
+model TE_USUARIO {
+  NUMUSUARIOID  Int     @id @default(autoincrement())
+  VCHCORREO     String?
+  VCHESTADO     String?
+  VCHFECHA      String?
+  VCHTIPUSUARIO String?
+  VCHROLID      Int?
 }

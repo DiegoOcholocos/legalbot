@@ -2,10 +2,7 @@
 
 import Title from '@/components/utils/system/Title';
 import TablaRoles from './TablaRoles';
-import {
-  Card,
-  useDisclosure,
-} from '@nextui-org/react';
+import { Card, useDisclosure } from '@nextui-org/react';
 import ModalRoles from '@/components/utils/modals/ModalRoles';
 import { useState } from 'react';
 import { IoAddCircle } from 'react-icons/io5';
