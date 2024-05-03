@@ -9,10 +9,7 @@ import {
   SelectItem,
 } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
-import {
-  obtenerExpedientePage,
-  obtenerCountExpediente,
-} from '@/services/Prisma/Expediente';
+import { obtenerExpedientePage, obtenerCountExpediente } from '@/services/Prisma/Expediente';
 import ButtonExcel from '../../utils/ButtonExcel';
 import Title from '../../utils/system/Title';
 import TablaExpedientes from '@/components/class/expedientes/TablaExpedientes';
@@ -38,12 +35,7 @@ const ListadoExpedientes = ({ estudio }) => {
       setExpedientesFilter([]);
       const count = await obtenerCountExpediente(searchTerm, estudio);
       setTotalDatos(count);
-      const expedientes = await obtenerExpedientePage(
-        numPage,
-        searchTerm,
-        10,
-        estudio
-      );
+      const expedientes = await obtenerExpedientePage(numPage, searchTerm, 10, estudio);
       setExpedientesFilter(expedientes);
       setEstadoExtraccion(ESTADOS_EX.FINALIZADO);
     };
@@ -54,13 +46,8 @@ const ListadoExpedientes = ({ estudio }) => {
     const fetchData = async () => {
       setEstadoExtraccion(ESTADOS_EX.EN_PROCESO);
       setExpedientesFilter([]);
-      
-      const expedientes = await obtenerExpedientePage(
-        numPage,
-        searchTerm,
-        10,
-        estudio
-      );
+
+      const expedientes = await obtenerExpedientePage(numPage, searchTerm, 10, estudio);
       setExpedientesFilter(expedientes);
       setEstadoExtraccion(ESTADOS_EX.FINALIZADO);
     };
@@ -86,7 +73,7 @@ const ListadoExpedientes = ({ estudio }) => {
   };
 
   const handlePageChange = (ActualPag) => {
-    console.log("Acp :",ActualPag)
+    console.log('Acp :', ActualPag);
     setNumPage(ActualPag);
     localStorage.setItem('paginaActual', ActualPag.toString());
   };
@@ -97,9 +84,7 @@ const ListadoExpedientes = ({ estudio }) => {
     <>
       <Title title='Expedientes' />
       <Card className='p-4 flex flex-col m-4'>
-        <h3 className='font-semibold mb-4'>
-          Filtros de los expedientes : {totalDatos}
-        </h3>
+        <h3 className='font-semibold mb-4'>Filtros de los expedientes : {totalDatos}</h3>
         <div className='flex flex-col lg:flex-row gap-2 h-auto items-center justify-center'>
           <div className='flex flex-1 items-center gap-2'>
             <Input
@@ -117,6 +102,7 @@ const ListadoExpedientes = ({ estudio }) => {
               name='tipo'
               size='sm'
               className='w-52 rounded-lg'
+              defaultSelectedKeys={[searchTerm.tipo]}
               onChange={handleOnChange}
             >
               <SelectItem key='Todos' value='Todos'>
@@ -138,17 +124,13 @@ const ListadoExpedientes = ({ estudio }) => {
             >
               🔍 Buscar
             </Button>
-            <ButtonExcel
-              filter={searchTerm}
-              pages={totalDatos}
-              estudio={estudio}
-            />
+            <ButtonExcel filter={searchTerm} pages={totalDatos} estudio={estudio} />
           </div>
         </div>
       </Card>
       <Card className='p-4 flex-1 m-4 flex flex-col gap-4'>
         <h3 className='font-semibold'>Total de Expedientes : {totalDatos}</h3>
-        <TablaExpedientes expedientesFilter={expedientesFilter}  />
+        <TablaExpedientes expedientesFilter={expedientesFilter} />
         {
           <>
             {estadoExtraccion === ESTADOS_EX.EN_PROCESO ? (
@@ -168,8 +150,7 @@ const ListadoExpedientes = ({ estudio }) => {
                   />
                 </div>
               </>
-            ) : estadoExtraccion === ESTADOS_EX.FINALIZADO &&
-              expedientesFilter.length === 0 ? (
+            ) : estadoExtraccion === ESTADOS_EX.FINALIZADO && expedientesFilter.length === 0 ? (
               <div className='flex w-full justify-center'>
                 <p>No se encontraron expedientes</p>
               </div>
