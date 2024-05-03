@@ -8,7 +8,7 @@ import {
   buscarExpedientes,
 } from '@/services/Prisma/Expediente';
 
-const FiltersDashboard = ({ handleFilters }) => {
+const FiltersDashboard = ({ handleFilters, estudio }) => {
   const [distritos, setDistritos] = useState([]);
   const [estados, setEstados] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
@@ -24,7 +24,7 @@ const FiltersDashboard = ({ handleFilters }) => {
     obntenerEspecialidadesExpedientes().then((res) =>
       setEspecialidades(res.map((especialidad) => especialidad.Especialidad))
     );
-  }, []);
+  }, [selectedTextFilters]);
 
   const handleFilterClick = () => {
     const filters = {
