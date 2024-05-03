@@ -34,8 +34,8 @@ export default function ListaRoles({ roles }) {
       </Title>
       <div className='p-4'>
         <Card className='p-4 flex flex-col gap-4'>
-          <h3>Cantidad de Roles : {roles.length}</h3>
-          {roles.length ? (
+          <h3>Cantidad de Roles : {rolesTotales.length}</h3>
+          {rolesTotales.length > 0 ? (
             <TablaRoles roles={rolesTotales} activeModal={activeModal} />
           ) : (
             <div className='w-full flex justify-center items-center my-4 gap-2'>
