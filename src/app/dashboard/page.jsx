@@ -18,12 +18,14 @@ export default async function pageDashboard() {
       nombre: 'Procesos Activos',
       valor: 0,
       href: '/dashboard/expedientes',
+      local: 'Activos',
     },
     {
       id: 2,
       nombre: 'Procesos Inactivos',
       valor: 0,
       href: '/dashboard/expedientes',
+      local: 'Inactivos',
     },
     {
       id: 3,
@@ -37,9 +39,7 @@ export default async function pageDashboard() {
   const expsTotales = await obtenerExpedientesTotales(estudio);
 
   const userData = await listarUsuarios();
-  const filteredUsersLength = userData.filter(
-    (user) => user.Enabled === true
-  ).length;
+  const filteredUsersLength = userData.filter((user) => user.Enabled === true).length;
 
   data = data.map((objeto) => {
     switch (objeto.nombre) {

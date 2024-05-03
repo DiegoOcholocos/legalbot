@@ -21,6 +21,7 @@ import {
 } from '@/services/Prisma/HistorialDocumentos';
 import Title from '../utils/system/Title';
 import ModalCarteraAlerta from '@/components/utils/modals/ModalCarteraAlerta';
+import { crearRegistroMasivo } from '@/services/Prisma/Estudio';
 
 const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   const [excelData, setExcelData] = useState([]);
@@ -224,7 +225,19 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         for (let i = 0; i < validData.length; i += tamañoLote) {
           lotes.push(validData.slice(i, i + tamañoLote));
         }
+        
         console.log('=== Hora Inicio Total: ', new Date());
+        let estudiosUnicos = new Set();
+        validData.forEach((expediente) => {
+          const claveUnica = `${expediente['CODIGO ESTUDIO']}/-/${expediente.ESTUDIO}`;
+          estudiosUnicos.add(claveUnica);
+        });
+
+        var estudios = Array.from(estudiosUnicos).map((estudio) => {
+          const [codigo, nombre] = estudio.split('/-/');
+          return { NUMESTUDIOID: codigo, VCHNOMBRE: nombre };
+        });
+        const estudiosCreados = await crearRegistroMasivo(estudios);
         let expedientesCargados = 0;
         for (let lote of lotes) {
           try {

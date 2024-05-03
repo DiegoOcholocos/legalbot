@@ -9,10 +9,7 @@ import {
   SelectItem,
 } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
-import {
-  obtenerExpedientePage,
-  obtenerCountExpediente,
-} from '@/services/Prisma/Expediente';
+import { obtenerExpedientePage, obtenerCountExpediente } from '@/services/Prisma/Expediente';
 import ButtonExcel from '../../utils/ButtonExcel';
 import Title from '../../utils/system/Title';
 import TablaExpedientes from '@/components/class/expedientes/TablaExpedientes';
@@ -24,7 +21,8 @@ const ESTADOS_EX = {
 };
 const ListadoExpedientes = ({ estudio }) => {
   const [expedientesFilter, setExpedientesFilter] = useState([]);
-  const [numPage, setNumPage] = useState(1);
+  const [numPage, setNumPage] = useState(parseInt(localStorage.getItem('paginaActual') || '1'));
+
   const [totalDatos, setTotalDatos] = useState(0);
   const [searchTerm, setSearchTerm] = useState({
     term: '',
@@ -37,12 +35,7 @@ const ListadoExpedientes = ({ estudio }) => {
       setExpedientesFilter([]);
       const count = await obtenerCountExpediente(searchTerm, estudio);
       setTotalDatos(count);
-      const expedientes = await obtenerExpedientePage(
-        1,
-        searchTerm,
-        10,
-        estudio
-      );
+      const expedientes = await obtenerExpedientePage(numPage, searchTerm, 10, estudio);
       setExpedientesFilter(expedientes);
       setEstadoExtraccion(ESTADOS_EX.FINALIZADO);
     };
@@ -53,17 +46,14 @@ const ListadoExpedientes = ({ estudio }) => {
     const fetchData = async () => {
       setEstadoExtraccion(ESTADOS_EX.EN_PROCESO);
       setExpedientesFilter([]);
-      const expedientes = await obtenerExpedientePage(
-        numPage,
-        searchTerm,
-        10,
-        estudio
-      );
+
+      const expedientes = await obtenerExpedientePage(numPage, searchTerm, 10, estudio);
       setExpedientesFilter(expedientes);
       setEstadoExtraccion(ESTADOS_EX.FINALIZADO);
     };
     fetchData();
   }, [numPage]);
+
   const filtrarExpedientes = async () => {
     setEstadoExtraccion(ESTADOS_EX.EN_PROCESO);
     setExpedientesFilter([]);
@@ -82,6 +72,11 @@ const ListadoExpedientes = ({ estudio }) => {
     }
   };
 
+  const handlePageChange = (ActualPag) => {
+    console.log('Acp :', ActualPag);
+    setNumPage(ActualPag);
+    localStorage.setItem('paginaActual', ActualPag.toString());
+  };
   const rowsPerPage = 10;
   const totalPages = Math.ceil(totalDatos / rowsPerPage);
 
@@ -89,9 +84,7 @@ const ListadoExpedientes = ({ estudio }) => {
     <>
       <Title title='Expedientes' />
       <Card className='p-4 flex flex-col m-4'>
-        <h3 className='font-semibold mb-4'>
-          Filtros de los expedientes : {totalDatos}
-        </h3>
+        <h3 className='font-semibold mb-4'>Filtros de los expedientes : {totalDatos}</h3>
         <div className='flex flex-col lg:flex-row gap-2 h-auto items-center justify-center'>
           <div className='flex flex-1 items-center gap-2'>
             <Input
@@ -109,6 +102,7 @@ const ListadoExpedientes = ({ estudio }) => {
               name='tipo'
               size='sm'
               className='w-52 rounded-lg'
+              defaultSelectedKeys={[searchTerm.tipo]}
               onChange={handleOnChange}
             >
               <SelectItem key='Todos' value='Todos'>
@@ -130,11 +124,7 @@ const ListadoExpedientes = ({ estudio }) => {
             >
               🔍 Buscar
             </Button>
-            <ButtonExcel
-              filter={searchTerm}
-              pages={totalDatos}
-              estudio={estudio}
-            />
+            <ButtonExcel filter={searchTerm} pages={totalDatos} estudio={estudio} />
           </div>
         </div>
       </Card>
@@ -160,8 +150,7 @@ const ListadoExpedientes = ({ estudio }) => {
                   />
                 </div>
               </>
-            ) : estadoExtraccion === ESTADOS_EX.FINALIZADO &&
-              expedientesFilter.length === 0 ? (
+            ) : estadoExtraccion === ESTADOS_EX.FINALIZADO && expedientesFilter.length === 0 ? (
               <div className='flex w-full justify-center'>
                 <p>No se encontraron expedientes</p>
               </div>
@@ -170,11 +159,11 @@ const ListadoExpedientes = ({ estudio }) => {
                 className='flex w-full justify-center -z-0 '
                 isCompact
                 showShadow
-                initialPage={1}
+                initialPage={numPage}
                 color='primary'
                 page={numPage}
                 total={totalPages}
-                onChange={(numPage) => setNumPage(numPage)}
+                onChange={handlePageChange}
               />
             )}
           </>

@@ -21,6 +21,37 @@ export async function crearRegistroEstudios(nombre) {
     console.error('Error creating estudio:', error);
   }
 }
+export async function crearRegistroMasivo(estudiosArchivo) {
+  try {
+    const estudiosExistentes = await db.TE_ESTUDIO.groupBy({
+      by: ['NUMESTUDIOID', 'VCHNOMBRE'],
+      select: {
+        NUMESTUDIOID: true,
+        VCHNOMBRE: true,
+      },
+    });
+    const estudiosExistentesArray = estudiosExistentes.map((estudio) => {
+      return `${estudio.NUMESTUDIOID}/-/${estudio.VCHNOMBRE}`;
+    });
+    const estudiosNuevos = estudiosArchivo.filter(
+      (estudio) =>
+        !estudiosExistentesArray.includes(`${estudio.NUMESTUDIOID}/-/${estudio.VCHNOMBRE}`)
+    );
+    const estudiosCreate = estudiosNuevos.map((estudio) => {
+      return {
+        NUMESTUDIOID: parseInt(estudio.NUMESTUDIOID),
+        VCHNOMBRE: estudio.VCHNOMBRE,
+      };
+    });
+    console.log('Estudios a crear:', estudiosCreate);
+    const nuevoEstudio = await db.TE_ESTUDIO.createMany({
+      data: estudiosCreate,
+    });
+    return nuevoEstudio;
+  } catch (error) {
+    console.error('Error creating estudio:', error);
+  }
+}
 export async function crearRegistroUsuarioEstudio(usuarioId, estudioId) {
   try {
     const nuevoRegistro = await db.TE_ESTUDIO_USUARIO.create({
@@ -67,5 +98,18 @@ export async function eliminarEstudio(idEstudio) {
   } catch (error) {
     console.error('Error al eliminar el estudio :', error);
     return null;
+  }
+}
+
+export async function obtenerEstudioNoAsignado() {
+  try {
+    const estudios = await db.TE_ESTUDIO.findFirst({
+      where: {
+        VCHNOMBRE: 'Estudio no asignado',
+      },
+    });
+    return estudios;
+  } catch {
+    console.error('Error al obtener el estudio no asignado');
   }
 }

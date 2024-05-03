@@ -2,13 +2,17 @@
 import { Card, Chip } from '@nextui-org/react';
 import Link from 'next/link';
 import Title from './system/Title';
+import { useRouter } from 'next/navigation';
 
 const TopCards = ({ data }) => {
+  const router = useRouter();
   const handleLocalStorage = (item) => {
-    const key = item === 'Procesos Activos' ? 'Activos' : 'Inactivos';
-    localStorage.setItem('procesosTipo', JSON.stringify(key));
+    if (item) {
+      localStorage.setItem('procesosTipo', JSON.stringify(item));
+      return;
+    }
+    router.push('/dashboard/expedientes');
   };
-
   return (
     <>
       <Title title={'Estados'} />
@@ -22,7 +26,7 @@ const TopCards = ({ data }) => {
                   <Link href={item.href}>
                     <Chip
                       color='primary'
-                      onClick={() => handleLocalStorage(item.nombre)}
+                      onClick={() => handleLocalStorage(item.local)}
                       className='cursor-pointer w-auto'
                     >
                       {item.valor}
