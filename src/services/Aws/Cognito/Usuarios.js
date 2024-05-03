@@ -1,7 +1,4 @@
-import {
-  crearRegistroEstudios,
-  crearRegistroUsuarioEstudio,
-} from '@/services/Prisma/Estudio';
+import { crearRegistroEstudios, crearRegistroUsuarioEstudio } from '@/services/Prisma/Estudio';
 import {
   EditarEstadoCuentaCognito2,
   EditarEstadoCuentaCognito1,
@@ -24,12 +21,12 @@ AWS.config.update({
 const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
 
 export const crearUsuario = async (credentials) => {
-  console.log(credentials);
-  const { email, usuario, password, estudio, tipoUsuario, rol } = credentials;
-  const usuarioId = await crearUsuarioP(email, tipoUsuario, Number(rol));
-  const estudioId = await crearRegistroEstudios(estudio);
-  console.log(usuarioId, estudioId.NUMESTUDIOID);
-  await crearRegistroUsuarioEstudio(usuarioId, estudioId.NUMESTUDIOID);
+  const { email, usuario, password, tipoUsuario, rol } = credentials;
+  const dataEstudio = credentials.estudio.split('/-/');
+  const estudioId = dataEstudio[0];
+  const estudioNombre = dataEstudio[1];
+  const usuarioId = await crearUsuarioP(email, tipoUsuario, Number(rol), parseInt(estudioId));
+  console.log('usuarioId', usuarioId);
   return new Promise((resolve, reject) => {
     const poolData = {
       UserPoolId: userPoolId,
@@ -48,7 +45,7 @@ export const crearUsuario = async (credentials) => {
         },
         {
           Name: 'custom:estudio',
-          Value: estudio,
+          Value: estudioNombre,
         },
         {
           Name: 'custom:tipoUsuario',
@@ -64,22 +61,19 @@ export const crearUsuario = async (credentials) => {
         },
         {
           Name: 'custom:estudio_id',
-          Value: String(estudioId.NUMESTUDIOID),
+          Value: String(estudioId),
         },
       ],
     };
 
-    cognitoidentityserviceprovider.adminCreateUser(
-      { ...poolData, ...userData },
-      (err, data) => {
-        if (err) {
-          console.error('Error al crear el usuario:', err);
-          reject(err); // Reject the promise with the error
-        } else {
-          resolve(true); // Resolve the promise with true on success
-        }
+    cognitoidentityserviceprovider.adminCreateUser({ ...poolData, ...userData }, (err, data) => {
+      if (err) {
+        console.error('Error al crear el usuario:', err);
+        reject(err); // Reject the promise with the error
+      } else {
+        resolve(true); // Resolve the promise with true on success
       }
-    );
+    });
   });
 };
 
@@ -140,11 +134,7 @@ export const adminEnableUser = async (username, mail) => {
 
 export const editarUsuario = async (data) => {
   console.log(data);
-  await editarUsuarioP(
-    Number(data.usuarioId),
-    data.tipoUsuario,
-    Number(data.rol)
-  );
+  await editarUsuarioP(Number(data.usuarioId), data.tipoUsuario, Number(data.rol));
 
   return new Promise((resolve, reject) => {
     const poolData = {
@@ -157,10 +147,7 @@ export const editarUsuario = async (data) => {
       UserAttributes: [
         {
           Name: 'custom:estudio',
-          Value:
-            data.tipoUsuario === 'Administrador'
-              ? ''
-              : data.estudio,
+          Value: data.tipoUsuario === 'Administrador' ? '' : data.estudio,
         },
         {
           Name: 'custom:tipoUsuario',
@@ -173,17 +160,14 @@ export const editarUsuario = async (data) => {
       ],
     };
 
-    cognitoidentityserviceprovider.adminUpdateUserAttributes(
-      params,
-      (err, data) => {
-        if (err) {
-          console.error('Error al editar el usuario:', err);
-          reject(err); // Reject the promise with the error
-        } else {
-          resolve(true); // Resolve the promise with true on success
-        }
+    cognitoidentityserviceprovider.adminUpdateUserAttributes(params, (err, data) => {
+      if (err) {
+        console.error('Error al editar el usuario:', err);
+        reject(err); // Reject the promise with the error
+      } else {
+        resolve(true); // Resolve the promise with true on success
       }
-    );
+    });
   });
 };
 

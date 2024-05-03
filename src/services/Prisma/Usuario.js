@@ -1,7 +1,7 @@
 'use server';
 import db from '@/libs/prisma';
 
-export async function crearUsuario(correo, tusuario, rol) {
+export async function crearUsuario(correo, tusuario, rol, estudioId) {
   try {
     const nuevoUsuario = await db.TE_USUARIO.create({
       data: {
@@ -9,6 +9,7 @@ export async function crearUsuario(correo, tusuario, rol) {
         VCHESTADO: '1',
         VCHTIPUSUARIO: tusuario,
         VCHROLID: rol,
+        NUMESTUDIOID: estudioId,
       },
     });
     return nuevoUsuario.NUMUSUARIOID; // Devolver el ID del nuevo usuario
@@ -87,6 +88,12 @@ export async function obtenerUsuario(correo) {
 }
 
 export async function obtenerUsuarios() {
-  const deleteActividad = await db.TE_USUARIO.findMany();
-  return deleteActividad;
+  const usuarios = await db.TE_USUARIO.findMany({
+    include: {
+      TE_ESTUDIO: {
+        select: { VCHNOMBRE: true },
+      },
+    },
+  });
+  return usuarios;
 }
