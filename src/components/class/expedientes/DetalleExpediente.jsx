@@ -15,7 +15,7 @@ import { crearExpedienteTarea, obtenerExpedienteTarea } from '@/services/Prisma/
 import { obtenerActividadesPorFlujo } from '@/services/Prisma/Actividad';
 import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
-
+import { estadosTareaExpediente } from "@/services/data";
 import { useEffect, useState } from 'react';
 import Title from '@/components/utils/system/Title';
 import DetalleExpedienteTarea from './DetalleExpedienteTarea';
@@ -78,7 +78,7 @@ export default function DetalleExpediente({
   const handleAsignTask = async (tarea) => {
     try {
       const dataTarea = {
-        vchestado: 'pendiente',
+        vchestado: estadosTareaExpediente.PENDIENTE,
         expedienteid: expediente.ExpedienteId,
         numtareaid: tarea.NUMTAREAID,
         fecfechainicio: new Date(),
