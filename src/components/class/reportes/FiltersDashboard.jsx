@@ -1,57 +1,39 @@
 'use client';
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-} from '@nextui-org/react';
+import { Autocomplete, AutocompleteItem, Button } from '@nextui-org/react';
 import {
   obntenerEspecialidadesExpedientes,
   obntenerEstadosExpedientes,
   obtenerDistritosJudicialesExpedientes,
+  buscarExpedientes,
 } from '@/services/Prisma/Expediente';
-const FiltersDashboard = ({ handleFilters, estudio }) => {
+
+const FiltersDashboard = ({ handleFilters }) => {
   const [distritos, setDistritos] = useState([]);
   const [estados, setEstados] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [selectedTextFilters, setSelectedTextFilters] = useState({});
-  useEffect(() => {
-    obtenerDistritosJudicialesExpedientes(selectedTextFilters, estudio).then(
-      (res) => setDistritos(res.map((distrito) => distrito.DistritoJudicial))
-    );
-    obntenerEstadosExpedientes(selectedTextFilters, estudio).then((res) =>
-      setEstados(res.map((distrito) => distrito.Estado))
-    );
-    obntenerEspecialidadesExpedientes(selectedTextFilters, estudio).then(
-      (res) => setEspecialidades(res.map((distrito) => distrito.Especialidad))
-    );
-  }, [selectedTextFilters]);
+  const [selectedDistrito, setSelectedDistrito] = useState('');
+  const [selectedEstado, setSelectedEstado] = useState('');
+  const [selectedEspecialidad, setSelectedEspecialidad] = useState('');
 
-  const onSelectionChange = (id, value) => {
-    const selectedValue = value !== '' ? value : null;
-    setSelectedFilters({ ...selectedFilters, [id]: selectedValue });
-  };
+  useEffect(() => {
+    obtenerDistritosJudicialesExpedientes().then((res) =>
+      setDistritos(res.map((distrito) => distrito.DistritoJudicial))
+    );
+    obntenerEstadosExpedientes().then((res) => setEstados(res.map((estado) => estado.Estado)));
+    obntenerEspecialidadesExpedientes().then((res) =>
+      setEspecialidades(res.map((especialidad) => especialidad.Especialidad))
+    );
+  }, []);
+
   const handleFilterClick = () => {
-    const selectedTextFilters = {
-      distrito:
-        selectedFilters.distrito !== null
-          ? distritos[selectedFilters.distrito]
-          : null,
-      estado:
-        selectedFilters.estado !== null
-          ? estados[selectedFilters.estado]
-          : null,
-      especialidad:
-        selectedFilters.especialidad !== null
-          ? especialidades[selectedFilters.especialidad]
-          : null,
+    const filters = {
+      distrito: selectedDistrito,
+      estado: selectedEstado,
+      especialidad: selectedEspecialidad,
     };
-    setSelectedTextFilters(selectedTextFilters);
-    handleFilters(selectedTextFilters);
+    console.log('filtros seleccionados:      ', filters);
+    handleFilters(filters);
   };
 
   return (
@@ -59,33 +41,33 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
       <h3 className='text-md font-bold gap-4'>Buscar por Filtros</h3>
       <Autocomplete
         label='Seleccione un distrito judicial'
-        onSelectionChange={(value) => onSelectionChange('distrito', value)}
-        defaultSelectedKey={selectedTextFilters?.distrito}
+        onSelectionChange={(value) => setSelectedDistrito(value)}
+        defaultSelectedKey={selectedDistrito}
       >
         {distritos.map((distrito, index) => (
-          <AutocompleteItem key={index} value={index}>
+          <AutocompleteItem key={index} value={distrito}>
             {distrito}
           </AutocompleteItem>
         ))}
       </Autocomplete>
       <Autocomplete
         label='Seleccione un estado'
-        onSelectionChange={(value) => onSelectionChange('estado', value)}
-        defaultSelectedKey={selectedTextFilters?.estado}
+        onSelectionChange={(value) => setSelectedEstado(value)}
+        defaultSelectedKey={selectedEstado}
       >
         {estados.map((estado, index) => (
-          <AutocompleteItem key={index} value={index}>
+          <AutocompleteItem key={index} value={estado}>
             {estado}
           </AutocompleteItem>
         ))}
       </Autocomplete>
       <Autocomplete
         label='Seleccione una especialidad'
-        onSelectionChange={(value) => onSelectionChange('especialidad', value)}
-        defaultSelectedKey={selectedTextFilters?.especialidad}
+        onSelectionChange={(value) => setSelectedEspecialidad(value)}
+        defaultSelectedKey={selectedEspecialidad}
       >
         {especialidades.map((especialidad, index) => (
-          <AutocompleteItem key={index} value={index}>
+          <AutocompleteItem key={index} value={especialidad}>
             {especialidad}
           </AutocompleteItem>
         ))}
