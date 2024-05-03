@@ -1,18 +1,16 @@
-"use client";
-import { Card, useDisclosure } from "@nextui-org/react";
-import { useState, useMemo } from "react";
-import TablaUsuariosCognito from "./TablaUsuariosCognito";
-import Title from "@/components/utils/system/Title";
-import ModalUser from "@/components/utils/modals/ModalUser";
+'use client';
+import { Card, useDisclosure } from '@nextui-org/react';
+import { useState, useMemo } from 'react';
+import TablaUsuariosCognito from './TablaUsuariosCognito';
+import Title from '@/components/utils/system/Title';
+import ModalUser from '@/components/utils/modals/ModalUser';
 import { IoAddCircle } from 'react-icons/io5';
 import Acciones from '@/components/utils/system/Acciones';
 import { IoMdSettings } from 'react-icons/io';
-import { listarUsuarios } from "@/services/Aws/Cognito/Usuarios";
+import { obtenerUsuarios } from '@/services/Prisma/Usuario';
 
 export default function ListaUsuarios({ usuariosData, rolesData, estudiosData }) {
   const [users, setUsers] = useState(usuariosData);
-  const [roles, setRoles] = useState(rolesData)
-  const [estudios, setEstudios] = useState(estudiosData)
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [editData, setEditData] = useState();
   const [mode, setMode] = useState('');
@@ -27,10 +25,10 @@ export default function ListaUsuarios({ usuariosData, rolesData, estudiosData })
   }, [page, users]);
 
   const fetchUsers = async () => {
-    const users = await listarUsuarios();
+    const users = await obtenerUsuarios();
     setUsers(users);
   };
-  
+
   const activeModal = (mode, data) => {
     setMode(mode);
     setEditData(data);
@@ -46,11 +44,11 @@ export default function ListaUsuarios({ usuariosData, rolesData, estudiosData })
 
   return (
     <>
-      <Title title={"Lista de Usuarios"}>
+      <Title title={'Lista de Usuarios'}>
         <Acciones icon={<IoMdSettings />} items={items} />
       </Title>
-      <div className="p-4">
-        <Card className="w-full md:col-span-2 relative flex flex-col gap-4 overflow-x-auto p-4">
+      <div className='p-4'>
+        <Card className='w-full md:col-span-2 relative flex flex-col gap-4 overflow-x-auto p-4'>
           <h3> Usuarios totales: {users.length}</h3>
 
           <TablaUsuariosCognito
@@ -69,13 +67,13 @@ export default function ListaUsuarios({ usuariosData, rolesData, estudiosData })
 
       <ModalUser
         isOpen={isOpen}
-        onOpenChange={onOpenChange}       
+        onOpenChange={onOpenChange}
         mode={mode}
         editData={editData}
         setUsers={setUsers}
         usersList={usersList}
-        roles={roles}
-        estudios={estudios}
+        roles={rolesData}
+        estudios={estudiosData}
         fetchUsers={fetchUsers}
       />
     </>

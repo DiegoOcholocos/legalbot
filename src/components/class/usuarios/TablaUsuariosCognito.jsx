@@ -9,10 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@nextui-org/react';
-import {
-  adminDisableUser,
-  adminEnableUser,
-} from '@/services/Aws/Cognito/Usuarios';
+import { adminDisableUser, adminEnableUser } from '@/services/Aws/Cognito/Usuarios';
 import Acciones from '@/components/utils/system/Acciones';
 
 const TablaUsuariosCognito = ({
@@ -24,9 +21,8 @@ const TablaUsuariosCognito = ({
   onOpenChange,
   setEditData,
   setMode,
-  fetchUsers
+  fetchUsers,
 }) => {
-
   const handleEditUser = (user) => {
     setMode('editar');
     setEditData(user);
@@ -42,7 +38,7 @@ const TablaUsuariosCognito = ({
     }
     fetchUsers();
   };
-  
+
   const handleChangePassword = async (user) => {
     setMode('cambiarContra');
     setEditData(user);
@@ -73,9 +69,6 @@ const TablaUsuariosCognito = ({
           Email
         </TableColumn>
         <TableColumn align='center' className='text-center'>
-          Estado de la Cuenta
-        </TableColumn>
-        <TableColumn align='center' className='text-center'>
           Tipo
         </TableColumn>
         <TableColumn align='center' className='text-center'>
@@ -95,8 +88,8 @@ const TablaUsuariosCognito = ({
               action: () => handleEditUser(user),
             },
             {
-              name: user.Enabled ? 'Desactivar' : 'Activar',
-              icon: user.Enabled ? '🗑️' : '✔️',
+              name: user.VCHESTADO == '1' ? 'Desactivar' : 'Activar',
+              icon: user.VCHESTADO == '1' ? '🗑️' : '✔️',
               action: () => handleToggleEnable(user),
             },
             {
@@ -106,33 +99,16 @@ const TablaUsuariosCognito = ({
             },
           ];
           return (
-            <TableRow
-              key={user.Username}
-              className='hover:bg-gray-100 dark:hover:bg-[#0005]'
-            >
-              <TableCell className='text-center text-sm'>
-                {user.Attributes.find((attr) => attr.Name === 'email').Value}
+            <TableRow key={user.Username} className='hover:bg-gray-100 dark:hover:bg-[#0005]'>
+              <TableCell className='text-center text-sm'>{user.VCHCORREO}</TableCell>
+              <TableCell className='text-center text-sm uppercase'>
+                {user.VCHTIPUSUARIO?.split('_').join(' ')}
               </TableCell>
               <TableCell className='text-center text-sm'>
-                {user.UserStatus === 'FORCE_CHANGE_PASSWORD'
-                  ? 'Cambio de contraseña obligatorio'
-                  : user.UserStatus === 'CONFIRMED'
-                  ? 'Confirmado'
-                  : 'Estado no reconocido'}
+                {user.TE_ESTUDIO?.VCHNOMBRE || 'Estudio no asignado'}
               </TableCell>
               <TableCell className='text-center text-sm'>
-                {user.Attributes.find(
-                  (attr) => attr.Name === 'custom:tipoUsuario'
-                )
-                  ?.Value.split('_')
-                  .join(' ')}
-              </TableCell>
-              <TableCell className='text-center text-sm'>
-                {user.Attributes.find((attr) => attr.Name === 'custom:estudio')
-                  ?.Value || 'Estudio no asignado'}
-              </TableCell>
-              <TableCell className='text-center text-sm'>
-                {user.Enabled ? 'Activo' : 'Desactivado'}
+                {user.VCHESTADO == '1' ? 'Activo' : 'Desactivado'}
               </TableCell>
               <TableCell className='text-center text-sm'>
                 <Acciones items={items} />

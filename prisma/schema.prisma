@@ -103,18 +103,7 @@ model TE_ESTUDIO {
   NUMESTUDIOID Int     @id @default(autoincrement())
   VCHNOMBRE    String?
   VCHNOMBRECOD String?
-
-  TE_ESTUDIO_USUARIO TE_ESTUDIO_USUARIO[]
-}
-
-// TE_ESTUDIO_USUARIO model
-model TE_ESTUDIO_USUARIO {
-  NUMUSUARIOID_id        Int
-  NUMESTUDIOID_id        Int
-  TE_ESTUDIO             TE_ESTUDIO? @relation(fields: [tE_ESTUDIONUMESTUDIOID], references: [NUMESTUDIOID])
-  tE_ESTUDIONUMESTUDIOID Int?
-
-  @@id([NUMESTUDIOID_id, NUMUSUARIOID_id])
+  TE_USUARIO   TE_USUARIO[]
 }
 
 // TE_FLUJO model
@@ -235,4 +224,6 @@ model TE_USUARIO {
   VCHFECHA      String?
   VCHTIPUSUARIO String?
   VCHROLID      Int?
+  NUMESTUDIOID  Int?
+  TE_ESTUDIO    TE_ESTUDIO?  @relation(fields: [NUMESTUDIOID],references: [NUMESTUDIOID])
 }
