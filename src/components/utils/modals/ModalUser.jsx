@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Modal,
   ModalContent,
@@ -28,10 +29,12 @@ export default function ModalUser({
   estudios,
   fetchUsers
 }) {
+  const router = useRouter();
   const [data, setData] = useState({});
   const [adminSeleccionado, setAdminSeleccionado] = useState(false)
+  const [emailValid, setEmailValid] = useState(true);
   const [externoSeleccionado, setExternoSeleccionado] = useState(false);
-
+  const [showWarning, setShowWarning] = useState(false);
   useEffect(() => {
     console.log(editData);
     if (!editData) {
@@ -66,9 +69,16 @@ export default function ModalUser({
     }
   }, [editData]);
 
+  const validarEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleCredentials = (e) => {
     const { name, value } = e.target;
     setData((prevState) => ({ ...prevState, [name]: value }));
+    if (name === 'email') {
+      setEmailValid(validarEmail(value));
+    }
   };
 
   const handleUserSelected = (userValue) => {
@@ -88,6 +98,10 @@ export default function ModalUser({
     console.log(data);
     try {
       if (mode === 'crear') {
+        if (!data.email || !data.usuario || !data.tipoUsuario || !data.rol || (data.tipoUsuario !== 'Administrador' && !data.estudio)) {
+          setShowWarning(true);
+          return;
+        }
         const res = await crearUsuario(data);
         if (res) {
           fetchUsers();
@@ -131,19 +145,45 @@ export default function ModalUser({
                 : 'Cambiar Contraseña'}
             </ModalHeader>
             <ModalBody>
-              {mode === 'crear' && (
+            {estudios.length === 0 && (
+              <div className='flex flex-col justify-center items-center gap-4 w-full'>
+                <p>Para crear un usuario es necesario tener al menos un estudio disponible para seleccionar.</p>
+                <Button color='primary' onPress={() => router.push('/dashboard/estudios')}>
+                  Agregar Usuarios
+                </Button>
+              </div>
+            )}
+            {roles.length === 0 && (
+              <div className='flex flex-col justify-center items-center gap-4 w-full'>
+                <p>Para crear un usuario es necesario tener al menos un rol disponible para seleccionar.</p>
+                <Button color='primary' onPress={() => router.push('/dashboard/roles')}>
+                  Agregar Roles
+                </Button>
+              </div>
+            )}
+            {roles.length > 0 && estudios.length > 0 && (
+                <>
+                {showWarning && (
+                 <p className='text-red-500'>Por favor, rellene todos los campos obligatorios. (*)</p>
+            )}
+             {mode === 'crear' && (
                 <Input
                   autoFocus
-                  label='Ingrese un email'
+                  label='Ingrese un email (*)'
                   name='email'
                   variant='bordered'
                   onChange={handleCredentials}
+                  status={!emailValid && 'error'}
                 />
+
               )}
+              {!emailValid && (
+              <p className='text-red-500'>Ingrese un email válido.</p>
+                )}
               {(mode === 'crear' || mode === 'editar') && (
                 <>
                   <Select
-                    label='Elija un tipo de usuario'
+                    label='Elija un tipo de usuario (*)'
                     name='tipoUsuario'
                     variant='bordered'
                     onChange={handleCredentials}
@@ -171,7 +211,7 @@ export default function ModalUser({
                     </SelectItem>
                   </Select>
                   <Select
-                    label='Elija un rol'
+                    label='Elija un rol (*)'
                     name='rol'
                     variant='bordered'
                     onChange={handleCredentials}
@@ -183,7 +223,7 @@ export default function ModalUser({
                     ))}
                   </Select>
                   <Select
-                    label='Elija un estudio'
+                    label='Elija un estudio (*)'
                     name='estudio'
                     variant='bordered'
                     onChange={handleCredentials}
@@ -199,7 +239,7 @@ export default function ModalUser({
               )}
               {mode === 'crear' && (
                 <Input
-                  label='Ingrese un usuario'
+                  label='Ingrese un usuario (*)'
                   name='usuario'
                   variant='bordered'
                   onChange={handleCredentials}
@@ -208,18 +248,21 @@ export default function ModalUser({
               )}
               {mode === 'cambiarContra' && (
                 <Input
-                  label='Ingrese un password'
+                  label='Ingrese un password (*)'
                   name='password'
                   type='password'
                   variant='bordered'
                   onChange={handleCredentials}
                 />
               )}
+            </>
+            )}
             </ModalBody>
             <ModalFooter>
               <Button color='danger' variant='flat' onPress={onClose}>
                 Cerrar
               </Button>
+              {roles.length > 0 && estudios.length > 0 && (
               <Button color='primary' onPress={() => handleSubmitBtn()}>
                 {mode === 'crear'
                   ? 'Crear usuario'
@@ -227,6 +270,7 @@ export default function ModalUser({
                   ? 'Editar Usuario'
                   : 'Cambiar Contraseña'}
               </Button>
+                )}
             </ModalFooter>
           </>
         )}
