@@ -15,6 +15,7 @@ import { ButtonLogout } from '@/components/auth/ButtonSession';
 const LayoutDashboard = ({ children, session, estudio }) => {
   const [collapsed, setSidebarCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  console.log(menu)
   return (
     <div
       className={`grid min-h-screen ${
@@ -77,14 +78,17 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
 
         <nav className='flex-grow w-full justify-between flex flex-col p-2'>
           <ul className='flex flex-col gap-2 items-stretch'>
-            {menu.map((item) => (
-              <ItemSidebar
-                key={item.nombre}
-                icon={item.icon}
-                nombre={item.nombre}
-                menu={item.menu}
-                collapsed={collapsed}
-              />
+            {menu.map((item) => ( <>
+                {item.permisos?.includes(session.user.tipoUsuario) && (
+                  <ItemSidebar
+                    key={item.nombre}
+                    icon={item.icon}
+                    nombre={item.nombre}
+                    menu={item.menu}
+                    collapsed={collapsed}
+                  />
+                )}
+              </>
             ))}
           </ul>
           <div className='w-full flex justify-center gap-2 flex-wrap'>
