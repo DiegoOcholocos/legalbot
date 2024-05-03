@@ -1,5 +1,5 @@
-"use client";
-import { useState, useEffect } from "react";
+'use client';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   ModalContent,
@@ -9,22 +9,13 @@ import {
   Button,
   Input,
   useDisclosure,
-} from "@nextui-org/react";
-import AWS from "aws-sdk";
-import {
-  editarActividad,
-  obtenerActividad,
-  obtenerActividadesPorFlujo,
-} from "@/services/Prisma/Actividad";
+} from '@nextui-org/react';
+
+import { descargarArchivo, listarArchivosCarpeta } from '@/services/Aws/S3/actions';
+import { FaCloudDownloadAlt } from 'react-icons/fa';
 export default function ModalArchivos({ Tarea }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [archivoObtenido, setArchivoObtenido] = useState([]);
-  const s3 = new AWS.S3({
-    region: "us-east-1",
-    accessKeyId: "AKIAVNIGRL6VQALTCM77",
-    secretAccessKey: "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",
-  });
-
+  const [archivoObtenido, setArchivoObtenido] = useState(null);
   const empresa = process.env.CLIENTE;
 
   useEffect(() => {
@@ -36,49 +27,28 @@ export default function ModalArchivos({ Tarea }) {
           const archivo = await extraccionarchivosS3(Tarea.VCHARCHIVOS);
           setArchivoObtenido(archivo);
         } catch (error) {
-          console.error("Error al obtener archivos:", error);
+          console.error('Error al obtener archivos:', error);
         }
       };
       archivos();
-      console.log("Estos son los archivos obtenidos", archivoObtenido);
+      console.log('Estos son los archivos obtenidos', archivoObtenido);
     }
   }, [!isOpen]);
 
   const handleDownloadFile = async (archivo) => {
-    const params = {
-      Bucket: "expedientespjvf",
-      Key: `${archivo}`, // Utiliza el nombre del archivo como Key para descargarlo
-    };
     try {
-      const data = await s3.getObject(params).promise();
-      const url = URL.createObjectURL(new Blob([data.Body]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", archivo);
-      document.body.appendChild(link);
-      link.click();
+      await descargarArchivo(archivo);
     } catch (error) {
-      console.error("Error al descargar el archivo de S3:", error);
+      console.error('Error al descargar el archivo de S3:', error);
     }
   };
 
   const extraccionarchivosS3 = async (folder) => {
     try {
-      const params = {
-        Bucket: "expedientespjvf",
-        Prefix: `archivos/${empresa}/${folder}/`,
-      };
-
-      console.log(params);
-      s3.listObjectsV2(params, function (err, data) {
-        if (err) {
-          console.log("Error al listar objetos: ", err);
-        } else {
-          setArchivoObtenido(data.Contents);
-        }
-      });
+      const archivos = await listarArchivosCarpeta(`archivos/${empresa}/${folder}/`);
+      return archivos;
     } catch (error) {
-      console.log("Error : ", error);
+      console.log('Error : ', error);
     }
   };
 
@@ -96,13 +66,14 @@ export default function ModalArchivos({ Tarea }) {
             <>
               <ModalHeader className='flex flex-col gap-4'>ARCHIVOS ASOCIADOS</ModalHeader>
               <ModalBody>
+                {archivoObtenido?.length == 0 && <p>No hay archivos asociados</p>}
                 {archivoObtenido?.map((archivo) => (
                   <div
                     key={archivo.ETag}
                     className='w-full flex justify-between items-center hover:bg-gray-700 p-2 rounded-md'
                   >
                     <h3 className='text-sm font-semibold'>
-                      {archivo.Key.split("/")[archivo.Key.split("/").length - 1]}
+                      {archivo.Key.split('/')[archivo.Key.split('/').length - 1]}
                     </h3>
                     <div className='flex gap-4'>
                       <Button
@@ -110,7 +81,7 @@ export default function ModalArchivos({ Tarea }) {
                         isIconOnly
                         onPress={() => handleDownloadFile(archivo.Key)}
                       >
-                        Descargar
+                        <FaCloudDownloadAlt />
                       </Button>
                     </div>
                   </div>

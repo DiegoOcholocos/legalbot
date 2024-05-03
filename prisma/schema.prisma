@@ -96,7 +96,6 @@ model TE_CARGAS {
 
   // Removed relation with TE_EXPEDIENTE_TAREA
   Expediente          Expediente?           @relation(fields: [VCHCODIGOEXPEDIENTE], references: [ExpedienteId])
-  TE_EXPEDIENTE_TAREA TE_EXPEDIENTE_TAREA[]
 }
 
 // TE_ESTUDIO model
@@ -193,12 +192,9 @@ model TE_EXPEDIENTE_TAREA {
   NUMTAREAID          Int?
   VCHESTADO           String?
   NUMEXPEDTAREAID     Int       @id @default(autoincrement())
-  BOOLTERMINADO       Boolean
 
   Expediente                     Expediente?                      @relation(fields: [expedienteid], references: [ExpedienteId])
   TE_TAREA                       TE_TAREA?                        @relation(fields: [NUMTAREAID], references: [NUMTAREAID])
-  TE_CARGAS                      TE_CARGAS?                       @relation(fields: [tE_CARGASNUMCARGASID], references: [NUMCARGASID])
-  tE_CARGASNUMCARGASID           Int?
   TE_DEPENDENCIASEXPEDIENTETAREA TE_DEPENDENCIASEXPEDIENTETAREA[]
 
   @@index([expedienteid], name: "te_expediente_tarea_expedienteid_index")
