@@ -13,6 +13,7 @@ import {
   obntenerEstadosExpedientes,
   obtenerDistritosJudicialesExpedientes,
 } from '@/services/Prisma/Expediente';
+import { GrPowerReset } from 'react-icons/gr';
 
 const FiltersDashboard = ({ handleFilters, estudio }) => {
   const [distritos, setDistritos] = useState([]);
@@ -48,6 +49,15 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
         selectedFilters.especialidad !== null ? especialidades[selectedFilters.especialidad] : null,
     };
     handleFilters(selectedTextFilters);
+  };
+
+  const handleReset = () => {
+    setSelectedFilters({
+      distrito: null,
+      estado: null,
+      especialidad: null,
+    });
+    handleFilters(setSelectedFilters);
   };
 
   return (
@@ -86,9 +96,14 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
           </AutocompleteItem>
         ))}
       </Autocomplete>
-      <Button color='primary' onClick={handleFilterClick} className='w-full'>
-        Filtrar
-      </Button>
+      <div className='flex justify-between mt-4'>
+        <Button color='primary' onClick={handleFilterClick} className='w-2/5'>
+          Filtrar
+        </Button>
+        <Button color='error' onClick={handleReset} className='w-2/5'>
+          <GrPowerReset color='green' />
+        </Button>
+      </div>
     </>
   );
 };
