@@ -91,7 +91,6 @@ export default function ModalUser({
       if (mode === 'crear') {
         if (
           !data.email ||
-          !data.usuario ||
           !data.tipoUsuario ||
           !data.rol ||
           (data.tipoUsuario !== 'Administrador' && !data.estudio)
