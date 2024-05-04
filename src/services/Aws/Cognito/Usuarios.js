@@ -1,9 +1,8 @@
 import { crearRegistroEstudios, crearRegistroUsuarioEstudio } from '@/services/Prisma/Estudio';
 import {
-  EditarEstadoCuentaCognito2,
-  EditarEstadoCuentaCognito1,
   editarUsuario as editarUsuarioP,
   crearUsuario as crearUsuarioP,
+  cambiarEstado,
 } from '@/services/Prisma/Usuario';
 const AWS = require('aws-sdk');
 
@@ -22,9 +21,11 @@ const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider();
 
 export const crearUsuario = async (credentials) => {
   const { email, usuario, password, tipoUsuario, rol } = credentials;
+  console.log('CR:', credentials);
   const dataEstudio = credentials.estudio.split('/-/');
   const estudioId = dataEstudio[0];
   const estudioNombre = dataEstudio[1];
+  console.log('estudio: ', credentials.estudio);
   const usuarioId = await crearUsuarioP(email, tipoUsuario, Number(rol), parseInt(estudioId));
   console.log('usuarioId', usuarioId);
   return new Promise((resolve, reject) => {
@@ -53,15 +54,15 @@ export const crearUsuario = async (credentials) => {
         },
         {
           Name: 'custom:rol',
-          Value: rol,
+          Value: rol ? String(rol) : null,
         },
         {
           Name: 'custom:usuario_id',
-          Value: String(usuarioId),
+          Value: usuarioId ? String(usuarioId) : null,
         },
         {
           Name: 'custom:estudio_id',
-          Value: String(estudioId),
+          Value: estudioId ? String(estudioId) : null,
         },
       ],
     };
@@ -95,7 +96,7 @@ export const listarUsuarios = async () => {
 };
 
 export const adminDisableUser = async (username, mail) => {
-  await EditarEstadoCuentaCognito2(mail);
+  await cambiarEstado(mail, '0');
   return new Promise((resolve, reject) => {
     const params = {
       UserPoolId: userPoolId,
@@ -114,7 +115,7 @@ export const adminDisableUser = async (username, mail) => {
 };
 
 export const adminEnableUser = async (username, mail) => {
-  await EditarEstadoCuentaCognito1(mail);
+  await cambiarEstado(mail, '1');
   return new Promise((resolve, reject) => {
     const params = {
       UserPoolId: userPoolId,
@@ -133,8 +134,16 @@ export const adminEnableUser = async (username, mail) => {
 };
 
 export const editarUsuario = async (data) => {
-  console.log(data);
-  await editarUsuarioP(Number(data.usuarioId), data.tipoUsuario, Number(data.rol));
+  console.log('EDIT : ', data);
+  const dataEstudio = data.estudio.split('/-/');
+  const estudioId = dataEstudio[0];
+  const estudioNombre = dataEstudio[1];
+  await editarUsuarioP(
+    Number(data.usuarioId),
+    data.tipoUsuario,
+    Number(data.rol),
+    parseInt(estudioId)
+  );
 
   return new Promise((resolve, reject) => {
     const poolData = {
@@ -147,7 +156,7 @@ export const editarUsuario = async (data) => {
       UserAttributes: [
         {
           Name: 'custom:estudio',
-          Value: data.tipoUsuario === 'Administrador' ? '' : data.estudio,
+          Value: estudioNombre,
         },
         {
           Name: 'custom:tipoUsuario',
@@ -155,7 +164,11 @@ export const editarUsuario = async (data) => {
         },
         {
           Name: 'custom:rol',
-          Value: data.rol,
+          Value: data.rol ? String(data.rol) : null,
+        },
+        {
+          Name: 'custom:estudio_id',
+          Value: estudioId ? String(estudioId) : null,
         },
       ],
     };

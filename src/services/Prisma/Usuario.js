@@ -9,7 +9,7 @@ export async function crearUsuario(correo, tusuario, rol, estudioId) {
         VCHESTADO: '1',
         VCHTIPUSUARIO: tusuario,
         VCHROLID: rol,
-        NUMESTUDIOID: estudioId,
+        NUMESTUDIOID: estudioId > 0 ? estudioId : null,
       },
     });
     return nuevoUsuario.NUMUSUARIOID; // Devolver el ID del nuevo usuario
@@ -19,42 +19,7 @@ export async function crearUsuario(correo, tusuario, rol, estudioId) {
   }
 }
 
-export async function EditarEstadoCuentaCognito2(correo) {
-  // Buscar el usuario por correo para obtener su NUMUSUARIOID
-  const usuario = await db.TE_USUARIO.findFirst({
-    where: { VCHCORREO: correo },
-  });
-
-  // Verificar si se encontró el usuario
-  if (!usuario) {
-    throw new Error(`Usuario con correo ${correo} no encontrado.`);
-  }
-
-  const registroActualizado = await db.TE_USUARIO.update({
-    where: { NUMUSUARIOID: usuario.NUMUSUARIOID },
-    data: { VCHESTADO: '2' },
-  });
-
-  return registroActualizado;
-}
-
-export async function EditarEstadoCuentaCognito1(correo) {
-  // Buscar el usuario por correo para obtener su NUMUSUARIOID
-  const usuario = await db.TE_USUARIO.findFirst({
-    where: { VCHCORREO: correo },
-  });
-  if (!usuario) {
-    throw new Error(`Usuario con correo ${correo} no encontrado.`);
-  }
-  const registroActualizado = await db.TE_USUARIO.update({
-    where: { NUMUSUARIOID: usuario.NUMUSUARIOID },
-    data: { VCHESTADO: '1' },
-  });
-
-  return registroActualizado;
-}
-
-export async function editarUsuario(usuarioId, tipoUsuario, rol) {
+export async function editarUsuario(usuarioId, tipoUsuario, rol, estudioId) {
   try {
     const usuarioActualizado = await db.TE_USUARIO.update({
       where: {
@@ -63,6 +28,7 @@ export async function editarUsuario(usuarioId, tipoUsuario, rol) {
       data: {
         VCHTIPUSUARIO: tipoUsuario,
         VCHROLID: rol,
+        NUMESTUDIOID: estudioId > 0 ? estudioId : null,
       },
     });
     console.log(`usuario con ID ${usuarioId} actualizado".`);
@@ -90,10 +56,29 @@ export async function obtenerUsuario(correo) {
 export async function obtenerUsuarios() {
   const usuarios = await db.TE_USUARIO.findMany({
     include: {
-      TE_ESTUDIO: {
-        select: { VCHNOMBRE: true },
-      },
+      TE_ESTUDIO: true,
     },
   });
   return usuarios;
+}
+
+export async function cambiarEstado(correo, estado) {
+  try {
+    const usuario = await db.TE_USUARIO.findFirst({
+      where: { VCHCORREO: correo },
+    });
+    const usuarioActualizado = await db.TE_USUARIO.update({
+      where: {
+        NUMUSUARIOID: usuario.NUMUSUARIOID,
+      },
+      data: {
+        VCHESTADO: estado,
+      },
+    });
+    console.log(`usuario con ID ${usuarioActualizado} actualizado".`);
+    return usuarioActualizado;
+  } catch (error) {
+    console.error('Error al editar el estudio:', error);
+    throw error;
+  }
 }

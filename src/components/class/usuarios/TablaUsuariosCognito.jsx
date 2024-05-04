@@ -24,17 +24,18 @@ const TablaUsuariosCognito = ({
   fetchUsers,
 }) => {
   const handleEditUser = (user) => {
+    console.log('Usuario Eduitar: ', user);
     setMode('editar');
     setEditData(user);
     onOpenChange(!isOpen);
   };
 
   const handleToggleEnable = async (user) => {
-    const usrmail = user.Attributes.find((attr) => attr.Name === 'email').Value;
-    if (user.Enabled) {
-      await adminDisableUser(user.Username, usrmail);
+    const usrmail = user.VCHCORREO;
+    if (user.VCHESTADO == '1') {
+      await adminDisableUser(user.VCHCORREO, usrmail);
     } else {
-      await adminEnableUser(user.Username, usrmail);
+      await adminEnableUser(user.VCHCORREO, usrmail);
     }
     fetchUsers();
   };

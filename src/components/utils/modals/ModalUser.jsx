@@ -27,37 +27,35 @@ export default function ModalUser({
   estudios,
   fetchUsers,
 }) {
-  console.log('es: ', estudios);
+  console.log('es: ', editData);
   const router = useRouter();
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    email: '',
+    usuario: '',
+    password: '',
+    estudio: 'Estudio no asignado',
+    tipoUsuario: '',
+    rol: 0,
+    usuarioId: '',
+    estudioId: '',
+  });
   const [adminSeleccionado, setAdminSeleccionado] = useState(false);
   const [emailValid, setEmailValid] = useState(true);
   const [externoSeleccionado, setExternoSeleccionado] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
   useEffect(() => {
-    console.log(editData);
-    if (!editData) {
+    if (editData?.NUMUSUARIOID) {
       setData({
-        email: '',
-        usuario: '',
+        email: editData.VCHCORREO,
+        usuario: editData.VCHCORREO,
         password: '',
-        estudio: 'Estudio no asignado',
-        tipoUsuario: '',
-        rol: 0,
-        usuarioId: '',
-        estudioId: '',
+        estudio: `${editData.TE_ESTUDIO?.NUMESTUDIOID}/-/${editData.TE_ESTUDIO?.VCHNOMBRE}`,
+        tipoUsuario: editData.VCHTIPUSUARIO,
+        rol: editData.VCHROLID,
+        usuarioId: editData.NUMUSUARIOID,
+        estudioId: editData.VCHTIPUSUARIO == 'Administrador' ? 0 : editData.NUMESTUDIOID,
       });
-    } else {
-      setData({
-        email: editData.Attributes.find((attr) => attr.Name === 'email')?.Value,
-        usuario: editData.Username,
-        password: '',
-        estudio: editData.Attributes.find((attr) => attr.Name === 'custom:estudio')?.Value,
-        tipoUsuario: editData.Attributes.find((attr) => attr.Name === 'custom:tipoUsuario')?.Value,
-        rol: editData.Attributes.find((attr) => attr.Name === 'custom:rol')?.Value,
-        usuarioId: editData.Attributes.find((attr) => attr.Name === 'custom:usuario_id')?.Value,
-        estudioId: editData.Attributes.find((attr) => attr.Name === 'custom:estudio_id')?.Value,
-      });
+      handleUserSelected(editData.VCHTIPUSUARIO);
     }
   }, [editData]);
 
@@ -87,6 +85,7 @@ export default function ModalUser({
   };
 
   const handleSubmitBtn = async () => {
+    data.estudio = data.tipoUsuario == 'Administrador' ? '0/-/Administrador' : data.estudio;
     console.log(data);
     try {
       if (mode === 'crear') {
@@ -189,6 +188,7 @@ export default function ModalUser({
                         label='Elija un tipo de usuario (*)'
                         name='tipoUsuario'
                         variant='bordered'
+                        defaultSelectedKeys={mode == 'editar' && [editData.VCHTIPUSUARIO]}
                         onChange={handleCredentials}
                       >
                         <SelectItem
@@ -217,6 +217,7 @@ export default function ModalUser({
                         label='Elija un rol (*)'
                         name='rol'
                         variant='bordered'
+                        defaultSelectedKeys={mode == 'editar' && [`${editData.VCHROLID}`]}
                         onChange={handleCredentials}
                       >
                         {roles.map((rol) => (
@@ -229,6 +230,11 @@ export default function ModalUser({
                         label='Elija un estudio (*)'
                         name='estudio'
                         variant='bordered'
+                        defaultSelectedKeys={
+                          mode == 'editar' && [
+                            `${editData.TE_ESTUDIO?.NUMESTUDIOID}/-/${editData.TE_ESTUDIO?.VCHNOMBRE}`,
+                          ]
+                        }
                         onChange={handleCredentials}
                         isDisabled={adminSeleccionado}
                       >
@@ -242,15 +248,6 @@ export default function ModalUser({
                         ))}
                       </Select>
                     </>
-                  )}
-                  {mode === 'crear' && (
-                    <Input
-                      label='Ingrese un usuario (*)'
-                      name='usuario'
-                      variant='bordered'
-                      onChange={handleCredentials}
-                      defaultValue={mode === 'editar' ? credentials.Username : ''}
-                    />
                   )}
                   {mode === 'cambiarContra' && (
                     <Input
