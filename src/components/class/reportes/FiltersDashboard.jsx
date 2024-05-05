@@ -1,13 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-} from '@nextui-org/react';
+import { Autocomplete, AutocompleteItem, Button } from '@nextui-org/react';
 import {
   obntenerEspecialidadesExpedientes,
   obntenerEstadosExpedientes,
@@ -26,16 +19,18 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
   });
 
   useEffect(() => {
-    obtenerDistritosJudicialesExpedientes({}, estudio).then((res) =>
-      setDistritos(res.map((distrito) => distrito.DistritoJudicial))
-    );
-    obntenerEstadosExpedientes({}, estudio).then((res) =>
-      setEstados(res.map((distrito) => distrito.Estado))
-    );
-    obntenerEspecialidadesExpedientes({}, estudio).then((res) =>
-      setEspecialidades(res.map((distrito) => distrito.Especialidad))
-    );
-  }, []);
+    obtenerDistritosJudicialesExpedientes({}, estudio)
+      .then((res) => setDistritos(res.map((distrito) => distrito.DistritoJudicial)))
+      .catch((error) => console.error('Error fetching districts:', error));
+
+    obntenerEstadosExpedientes({}, estudio)
+      .then((res) => setEstados(res.map((estado) => estado.Estado)))
+      .catch((error) => console.error('Error fetching states:', error));
+
+    obntenerEspecialidadesExpedientes({}, estudio)
+      .then((res) => setEspecialidades(res.map((especialidad) => especialidad.Especialidad)))
+      .catch((error) => console.error('Error fetching specialties:', error));
+  }, [estudio]); // Make sure to include estudio in the dependency array
 
   const onSelectionChange = (id, value) => {
     setSelectedFilters({ ...selectedFilters, [id]: value });
@@ -57,7 +52,7 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
       estado: null,
       especialidad: null,
     });
-    handleFilters(setSelectedFilters);
+    handleFilters({});
   };
 
   return (
@@ -66,7 +61,7 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
       <Autocomplete
         label='Seleccione un distrito judicial'
         onSelectionChange={(value) => onSelectionChange('distrito', value)}
-        defaultSelectedKey={selectedFilters.distrito}
+        defaultSelectedKey={selectedFilters.distrito !== null ? selectedFilters.distrito : -1}
       >
         {distritos.map((distrito, index) => (
           <AutocompleteItem key={index} value={index}>
@@ -77,7 +72,7 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
       <Autocomplete
         label='Seleccione un estado'
         onSelectionChange={(value) => onSelectionChange('estado', value)}
-        defaultSelectedKey={selectedFilters.estado}
+        defaultSelectedKey={selectedFilters.estado !== null ? selectedFilters.estado : -1}
       >
         {estados.map((estado, index) => (
           <AutocompleteItem key={index} value={index}>
@@ -88,7 +83,9 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
       <Autocomplete
         label='Seleccione una especialidad'
         onSelectionChange={(value) => onSelectionChange('especialidad', value)}
-        defaultSelectedKey={selectedFilters.especialidad}
+        defaultSelectedKey={
+          selectedFilters.especialidad !== null ? selectedFilters.especialidad : -1
+        }
       >
         {especialidades.map((especialidad, index) => (
           <AutocompleteItem key={index} value={index}>
@@ -101,7 +98,7 @@ const FiltersDashboard = ({ handleFilters, estudio }) => {
           Filtrar
         </Button>
         <Button color='error' onClick={handleReset} className='w-2/5'>
-          <GrPowerReset color='green' />
+          <GrPowerReset />
         </Button>
       </div>
     </>
