@@ -43,58 +43,6 @@ export default function DetalleExpediente({
       console.log(data);
     })();
   }, []);
-
-  const handleAsignWorflow = async () => {
-    if (!flujoId) {
-      onOpen(); // Modal advertencia
-      return;
-    }
-    console.log('este es el flujo', flujoId);
-    const flujoData = await obtenerFlujo(flujoId);
-    console.log('f:', flujoData);
-
-    const actividadesData = await obtenerActividadesPorFlujo(flujoData.NUMFLUJOID);
-
-    console.log('ACTIVIDADES  POR FLUJO', actividadesData);
-    for (const actividad of actividadesData) {
-      const tareasData = await obtenerTareasActividad(actividad.NUMACTIVIDADID);
-      actividad['TAREAS'] = tareasData;
-    }
-    setActividades([...actividadesData]);
-
-    setMostrarFlujoData(true);
-
-    console.log('Este es el flujo', flujoData);
-    console.log('Estas son las actividades', actividadesData);
-    for (const actividad of actividadesData) {
-      for (const tarea of actividad['TAREAS']) {
-        handleAsignTask(tarea);
-        console.log('TAREA DENTRO DEL ARREGLO ', tarea);
-      }
-      console.log('terminado');
-    }
-  };
-
-  const handleAsignTask = async (tarea) => {
-    try {
-      const dataTarea = {
-        vchestado: estadosTareaExpediente.PENDIENTE,
-        expedienteid: expediente.ExpedienteId,
-        numtareaid: tarea.NUMTAREAID,
-        fecfechainicio: new Date(),
-        fecfechaculminacion: new Date(),
-      };
-
-      const nuevaTareaId = await crearExpedienteTarea(dataTarea);
-      if (nuevaTareaId) {
-        setTareasExpediente([...tareasExpediente, nuevaTareaId]);
-      } else {
-        console.error(`Error al crear la tarea para actividad ${tarea.NUMACTIVIDADID}`);
-      }
-    } catch (error) {
-      console.error('Error en handleAsignTask:', error);
-    }
-  };
   console.log(tareasExpediente);
   return (
     <>

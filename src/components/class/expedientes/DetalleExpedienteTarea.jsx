@@ -69,7 +69,11 @@ export default function DetalleExpedienteTarea({
     //   handleAsignTask(Tarea);
     // }
   };
-
+  function agregarDias(fecha, dias) {
+    const resultado = new Date(fecha);
+    resultado.setDate(resultado.getDate() + dias);
+    return resultado;
+  }
   const handleAsignTask = async (tarea) => {
     const fechaculminacion = new Date().getDate() + tarea.NUMDIASDURACIONN;
     console.log('Esta es la fecha para culminar ', fechaculminacion);
@@ -79,7 +83,7 @@ export default function DetalleExpedienteTarea({
         expedienteid: expedientedata.ExpedienteId,
         NUMTAREAID: tarea.NUMTAREAID,
         FECHAINICIO: new Date(),
-        FECFECHACULMINACION: new Date(),
+        FECFECHACULMINACION: agregarDias(new Date(),tarea.NUMDIASDURACIONN),
         FECHFECHACREACION: new Date(),
       };
 

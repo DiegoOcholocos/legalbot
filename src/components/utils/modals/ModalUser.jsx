@@ -33,7 +33,7 @@ export default function ModalUser({
     email: '',
     usuario: '',
     password: '',
-    estudio: 'Estudio no asignado',
+    estudio: '',
     tipoUsuario: '',
     rol: 0,
     usuarioId: '',
