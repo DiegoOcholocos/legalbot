@@ -62,6 +62,15 @@ export async function obtenerUsuarios() {
   return usuarios;
 }
 
+export async function obtenerUsuariosporid(usuarioid) {
+  const usuarios = await db.TE_USUARIO.findFirst({
+    where: {
+      NUMUSUARIOID: usuarioid,
+    },
+  });
+  return usuarios;
+}
+
 export async function cambiarEstado(correo, estado) {
   try {
     const usuario = await db.TE_USUARIO.findFirst({
