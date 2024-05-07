@@ -11,6 +11,7 @@ import {
 } from 'react-icons/rx';
 import ButtonTheme from '@/components/utils/system/ButtonTheme';
 import { ButtonLogout } from '@/components/auth/ButtonSession';
+import Unauthorized from '@/components/auth/Unauthorized';
 
 const LayoutDashboard = ({ children, session, estudio }) => {
   const [collapsed, setSidebarCollapsed] = useState(false);
@@ -79,8 +80,10 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
         <nav className='flex-grow w-full justify-between flex flex-col p-2'>
           <ul className='flex flex-col gap-2 items-stretch'>
             {menu.map((item) => ( <>
-                {item.permisos?.includes(session.user.tipoUsuario) && (
+                {item.permisos?.includes(session.user.tipoUsuario) && ( 
                   <ItemSidebar
+                    user={session.user}
+                    permisos={item.permisos}
                     key={item.nombre}
                     icon={item.icon}
                     nombre={item.nombre}
@@ -112,8 +115,9 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
   );
 };
 
-const ItemSidebar = ({ icon, nombre, menu, collapsed }) => {
+const ItemSidebar = ({ user, permisos,key, icon, nombre, menu, collapsed }) => {
   return (
+    <Unauthorized user={user} permisos={permisos} key={key}>
     <li
       key={nombre}
       className={`
@@ -129,7 +133,9 @@ const ItemSidebar = ({ icon, nombre, menu, collapsed }) => {
         {icon} <span>{!collapsed && menu[0].nombre}</span>
       </Link>
     </li>
+    </Unauthorized>
   );
+
 };
 
 const Navbar = ({ onMenuButtonClick }) => {

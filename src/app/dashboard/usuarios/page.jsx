@@ -1,10 +1,13 @@
 import { listarUsuarios } from '@/services/Aws/Cognito/Usuarios';
 import { getServerSession } from 'next-auth';
+import { menu } from "@/services/data";
 import { options } from '@/app/api/auth/[...nextauth]/options';
 import ListaUsuarios from '@/components/class/usuarios/ListaUsuarios';
 import { obtenerEstudios } from '@/services/Prisma/Estudio';
 import { obtenerRoles } from '@/services/Prisma/Rol';
 import { obtenerUsuarios } from '@/services/Prisma/Usuario';
+import Unauthorized from '@/components/auth/Unauthorized';
+
 const pageUsuarios = async () => {
   const session = await getServerSession(options);
   const dataUser = session.user.tipoUsuario;
@@ -26,12 +29,8 @@ const pageUsuarios = async () => {
   } catch (error) {
     console.error('Error fetching:', error);
   }
+    return <Unauthorized user={session.user} permisos={menu[4].permisos} children={<ListaUsuarios usuariosData={listaDeUsuarios} rolesData={roles} estudiosData={estudios} />}/>;
 
-  if (session.user.tipoUsuario !== 'Administrador') {
-    return <p>No tienes permisos para ver esta página Principal.</p>;
-  }
-
-  return <ListaUsuarios usuariosData={listaDeUsuarios} rolesData={roles} estudiosData={estudios} />;
 };
 
 export default pageUsuarios;
