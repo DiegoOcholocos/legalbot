@@ -6,7 +6,6 @@ import {
   obntenerEstadosExpedientes,
   obtenerDistritosJudicialesExpedientes,
 } from '@/services/Prisma/Expediente';
-import { GrPowerReset } from 'react-icons/gr';
 
 const FiltersDashboard = ({ handleFilters, estudio, filtros }) => {
   const [distritos, setDistritos] = useState([]);
@@ -37,9 +36,9 @@ const FiltersDashboard = ({ handleFilters, estudio, filtros }) => {
         <label className='text-sm font-medium'>Seleccione un distrito judicial :</label>
         <Autocomplete
           onSelectionChange={(value) => onSelectionChange('distrito', value)}
-          defaultSelectedKey={filtros?.distrito || ''}
+          defaultSelectedKey={filtros?.distrito}
         >
-          {distritos.map((distrito, index) => (
+          {distritos.map((distrito) => (
             <AutocompleteItem key={distrito} value={distrito}>
               {distrito}
             </AutocompleteItem>
@@ -50,9 +49,9 @@ const FiltersDashboard = ({ handleFilters, estudio, filtros }) => {
         <label className='text-sm font-medium'>Seleccione un estado :</label>
         <Autocomplete
           onSelectionChange={(value) => onSelectionChange('estado', value)}
-          defaultSelectedKey={filtros?.estado || ''}
+          defaultSelectedKey={filtros?.estado}
         >
-          {estados.map((estado, index) => (
+          {estados.map((estado) => (
             <AutocompleteItem key={estado} value={estado}>
               {estado}
             </AutocompleteItem>
@@ -63,9 +62,9 @@ const FiltersDashboard = ({ handleFilters, estudio, filtros }) => {
         <label className='text-sm font-medium'>Seleccione una especialidad :</label>
         <Autocomplete
           onSelectionChange={(value) => onSelectionChange('especialidad', value)}
-          defaultSelectedKey={filtros?.especialidad || ''}
+          defaultSelectedKey={filtros?.especialidad}
         >
-          {especialidades.map((especialidad, index) => (
+          {especialidades.map((especialidad) => (
             <AutocompleteItem key={especialidad} value={especialidad}>
               {especialidad}
             </AutocompleteItem>
