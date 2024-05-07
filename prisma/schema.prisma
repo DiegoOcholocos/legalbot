@@ -95,12 +95,12 @@ model TE_CARGAS {
   VCHBUFFER03          String?
 
   // Removed relation with TE_EXPEDIENTE_TAREA
-  Expediente          Expediente?           @relation(fields: [VCHCODIGOEXPEDIENTE], references: [ExpedienteId])
+  Expediente Expediente? @relation(fields: [VCHCODIGOEXPEDIENTE], references: [ExpedienteId])
 }
 
 // TE_ESTUDIO model
 model TE_ESTUDIO {
-  NUMESTUDIOID Int     @id @default(autoincrement())
+  NUMESTUDIOID Int          @id @default(autoincrement())
   VCHNOMBRE    String?
   VCHNOMBRECOD String?
   TE_USUARIO   TE_USUARIO[]
@@ -205,6 +205,7 @@ model TE_HISTORIALDOCS {
   VCHCANTEXP         String?
   VCHESTADO          String?
   VCHFECHACARDA      String?
+  VCHCANTEXPFALLOS   String?
 }
 
 model TE_ROL {
@@ -218,12 +219,12 @@ model TE_ROL {
 }
 
 model TE_USUARIO {
-  NUMUSUARIOID  Int     @id @default(autoincrement())
+  NUMUSUARIOID  Int         @id @default(autoincrement())
   VCHCORREO     String?
   VCHESTADO     String?
   VCHFECHA      String?
   VCHTIPUSUARIO String?
   VCHROLID      Int?
   NUMESTUDIOID  Int?
-  TE_ESTUDIO    TE_ESTUDIO?  @relation(fields: [NUMESTUDIOID],references: [NUMESTUDIOID])
+  TE_ESTUDIO    TE_ESTUDIO? @relation(fields: [NUMESTUDIOID], references: [NUMESTUDIOID])
 }

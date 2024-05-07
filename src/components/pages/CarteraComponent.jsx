@@ -123,7 +123,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
               // Validar los datos según el encabezado correspondiente
               if (encabezado === 'CODIGO UNICO DE EXPEDIENTE') {
                 const patron_cod_expediente =
-                  /\b\d{5}-\d{4}-\d{1,2}-\d{4}-[a-zA-Z]{2}-[a-zA-Z]{2}-\d+\b/i;
+                  /\b\d{5}-\d{4}-\d{1,2}-\d{4}-[a-zA-Z]{2}-[a-zA-Z]{2}-\d{1,2}\b/i;
                 expedientesValidos.push(datosFila);
                 if (!patron_cod_expediente.test(valorCelda)) {
                   hasError = true;
@@ -151,10 +151,12 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         setExcelData(expedientesValidos); // Establece solo las filas con errores como datos del Excel
 
         const nomArchivo = archivo.name;
-        const rowCountString = expedientesValidos.length - rowsWithError.length;
+        const rowCountString = expedientesValidos.length;
+        const rowfailCountString = rowsWithError.length;
         const idData = await crearRegistroHistorial(
           nomArchivo,
           rowCountString.toString(),
+          rowfailCountString.toString(),
           'No Cargado',
           fechaFormateada
         );
@@ -225,7 +227,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         for (let i = 0; i < validData.length; i += tamañoLote) {
           lotes.push(validData.slice(i, i + tamañoLote));
         }
-        
+
         console.log('=== Hora Inicio Total: ', new Date());
         let estudiosUnicos = new Set();
         validData.forEach((expediente) => {
@@ -283,133 +285,174 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
     inputFileRef.current.value = null;
   };
 
+  const renderFileUploadSection = () => (
+    <div className='flex flex-col gap-4'>
+      <label className='font-bold text-md' htmlFor='file_input'>
+        Subir el archivo de expedientes :
+      </label>
+      <div>
+        <input
+          className='block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-400 file:text-white file:cursor-pointer cursor-default'
+          aria-describedby='file_input_help'
+          id='file_input'
+          type='file'
+          accept='.xlsx, .xls'
+          onChange={handleFileUpload}
+          ref={inputFileRef}
+        />
+        <p className='text-sm text-gray-400 p-2' id='file_input_help'>
+          Solo se aceptan archivos de tipo XLSX o XLS. ❗
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderUploadStatus = () => (
+    <div className='flex flex-col gap-1 px-2'>
+      {uploading && <p> - Subiendo a la nube... ⌛</p>}
+      {uploadCompleted && <p> - La carga a la Nube se ha completado exitosamente. ✔️</p>}
+      {validFormat === false && (
+        <p>- Formato de Excel no válido. Por favor, verifica la estructura. ❌</p>
+      )}
+      {validFormat === false && <p> - Cantidad de expedientes máximo por archivo: {limite} ❌</p>}
+      {!uploading && contArchivoT > 0 && validFormat && (
+        <>
+          <p>{`Cantidad de expedientes en el archivo : ${contArchivoT}`} ✔️</p>
+          <p>{`Cantidad de expedientes en la aplicación : ${totalDatos}`} ✔️</p>
+          <p>{`Cantidad de errores en el archivo : ${errorCount}`} ✔️</p>
+          <p>{`Límite de cartera : ${limite}`} ✔️</p>
+          {totalDatos + contArchivoT > limite ? (
+            <h1>
+              No se puede subir el archivo porque excede el límite de la cartera. Te excediste por:{' '}
+              {contArchivoT + totalDatos - limite} ❌
+            </h1>
+          ) : (
+            <div className='flex justify-center'>
+              <Button
+                radius='full'
+                onClick={handleShowExcel}
+                color='primary'
+                disabled={uploading || contArchivoT + totalDatos > limite}
+              >
+                Subir expedientes
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+      {!uploading && contArchivoT === 0 && validFormat && (
+        <p>No hay datos de Excel para mostrar.</p>
+      )}
+    </div>
+  );
+
+  const renderErrorSection = () =>
+    errorCount > 0 && (
+      <div className='mt-4'>
+        <h2 className='text-lg font-semibold mb-2'>Errores encontrados:</h2>
+        <table className='w-full border-collapse border border-gray-600'>
+          <thead>
+            <tr>
+              <TableColumn>
+                Se han borrado todas las columnas que no cumplen con el formato y se descargara un
+                excel con los errores para su análisis
+              </TableColumn>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    );
+
+  const renderExpedientesHistoricos = () =>
+    expedientes.length > 0 && (
+      <div className='mt-4'>
+        <h2 className='text-lg font-semibold mb-2'>Expedientes Históricos:</h2>
+        <div className='flex justify-center'>
+          <Table removeWrapper className='w-full'>
+            <TableHeader>
+              <TableColumn>
+                <p>Nombre Documento</p>
+              </TableColumn>
+              <TableColumn>
+                <p>Cant. expedientes</p>
+                <p>en el documento</p>
+              </TableColumn>
+              <TableColumn>
+                <p>Cant. expedientes</p>
+                <p>con errores</p>
+              </TableColumn>
+              <TableColumn>
+                <p>Cant. expedientes</p>
+                <p>válidos</p>
+              </TableColumn>
+              <TableColumn>
+                <p>Estado de la carga</p>
+              </TableColumn>
+              <TableColumn>
+                <p>Fecha de carga</p>
+              </TableColumn>
+            </TableHeader>
+            <TableBody>
+              {expedientes.map((expediente) => (
+                <TableRow key={expediente.NUMHISTORIALDOCSID}>
+                  <TableCell>{expediente.VCHNOMDOC}</TableCell>
+                  <TableCell>{expediente.VCHCANTEXP} 📄</TableCell>
+                  <TableCell>
+                    {expediente.VCHCANTEXPFALLOS}
+                    {expediente.VCHCANTEXPFALLOS !== '0' && (
+                      <span role='img' aria-label='check'>
+                        ❗
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>{expediente.VCHCANTEXP - expediente.VCHCANTEXPFALLOS} 📝</TableCell>
+                  <TableCell>
+                    {expediente.VCHESTADO === 'Cargado' && (
+                      <span role='img' aria-label='check'>
+                        Cargado ✔️
+                      </span>
+                    )}
+                    {expediente.VCHESTADO === 'No Cargado' && (
+                      <span role='img' aria-label='check'>
+                        No Cargado ❌
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>{expediente.VCHFECHACARDA}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+
   return (
     <>
       <Title title='Cartera de Expedientes' />
-
       <Card className='p-4 rounded-lg mx-4 flex flex-col gap-4'>
-        <div className='flex flex-col gap-4'>
-          <label className='font-bold text-md' for='file_input'>
-            Subir el archivo de expedientes :
-          </label>
-          <div>
-            <input
-              className='block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-400 file:text-white file:cursor-pointer cursor-default'
-              aria-describedby='file_input_help'
-              id='file_input'
-              type='file'
-              accept='.xlsx, .xls'
-              onChange={handleFileUpload}
-              ref={inputFileRef}
-            />
-            <p class='text-sm text-gray-400 p-2' id='file_input'>
-              Solo se aceptan archivos de tipo XLSX o XLS. ❗
-            </p>
-          </div>
-        </div>
+        <label className='font-bold text-md' htmlFor='file_input'>
+          Expedientes :
+        </label>
+        <Table aria-label='Example static collection table' className='center'>
+          <TableHeader>
+            <TableColumn>Limite de Expedientes</TableColumn>
+            <TableColumn>Expedientes Cargados</TableColumn>
+            <TableColumn>Expedientes Disponible</TableColumn>
+          </TableHeader>
+          <TableBody>
+            <TableRow key='1'>
+              <TableCell>{limite}</TableCell>
+              <TableCell>{totalDatos}</TableCell>
+              <TableCell>{limite - totalDatos}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        {renderFileUploadSection()}
         <h3>Porcentaje de Expedientes Subidos :{porcentaje ? porcentaje + '%' : '0%'} ⌛</h3>
-        <div className='flex flex-col gap-1 px-2 '>
-          {uploading && <p> - Subiendo a la nube...</p>}
-          {uploadCompleted && <p> - La carga a la Nube se ha completado exitosamente. ✔️</p>}
-          {uploading ? <p>Subiendo... ⌛</p> : null}
-          {validFormat === false && (
-            <p>- Formato de Excel no válido. Por favor, verifica la estructura. ❌</p>
-          )}
-          {validFormat === false && (
-            <p> - Cantidad de expedientes máximo por archivo: {limite} ❌</p>
-          )}
-
-          {!uploading && contArchivoT > 0 && validFormat && (
-            <>
-              <p>{`Cantidad de expedientes en el archivo : ${contArchivoT}`} ✔️</p>
-              <p>{`Cantidad de expedientes en la aplicación : ${totalDatos}`} ✔️</p>
-              <p>{`Cantidad de errores en el archivo : ${errorCount}`} ✔️</p>
-              {/* Mostrar la cantidad de errores */}
-              <p>{`LÍMITE DE CARTERA : ${limite}`} ✔️</p>
-              {/* Mostrar el límite de la cartera */}
-              {totalDatos + contArchivoT > limite ? (
-                <h1>
-                  No se puede subir el archivo porque excede el límite de la cartera. Te excediste
-                  por: {contArchivoT + totalDatos - limite} ❌
-                </h1>
-              ) : (
-                <div className='flex justify-center'>
-                  <Button
-                    radius='full'
-                    onClick={handleShowExcel}
-                    color='primary'
-                    disabled={uploading || contArchivoT + totalDatos > limite}
-                  >
-                    Subir expedientes
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-          {!uploading && contArchivoT === 0 && validFormat && (
-            <p>No hay datos de Excel para mostrar.</p>
-          )}
-        </div>
-        {/* Mostrar la lista de errores en una tabla */}
-        {errorCount > 0 && (
-          <div className='mt-4'>
-            <h2 className='text-lg font-semibold mb-2'>Errores encontrados:</h2>
-            <table className='w-full border-collapse border border-gray-600'>
-              <thead>
-                <tr>
-                  <TableColumn>
-                    Se han borrado todas las columnas que no cumplen con el formato y se descargara
-                    un excel con los errores para su analisis
-                  </TableColumn>
-                </tr>
-              </thead>
-            </table>
-          </div>
-        )}
-        {expedientes.length > 0 && (
-          <div className='mt-4'>
-            <h2 className='text-lg font-semibold mb-2'>Expedientes Históricos:</h2>
-            <div className='flex justify-center'>
-              <Table removeWrapper className='w-full'>
-                <TableHeader>
-                  <TableColumn>
-                    <p>Nombre Documento</p>
-                  </TableColumn>
-                  <TableColumn>
-                    <p>Cant. expedientes</p>
-                  </TableColumn>
-                  <TableColumn>
-                    <p>Estado de la carga</p>
-                  </TableColumn>
-                  <TableColumn>
-                    <p>Fecha de carga</p>
-                  </TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {expedientes.map((expediente) => (
-                    <TableRow key={expediente.NUMHISTORIALDOCSID}>
-                      <TableCell>{expediente.VCHNOMDOC}</TableCell>
-                      <TableCell>{expediente.VCHCANTEXP}</TableCell>
-                      <TableCell>
-                        {expediente.VCHESTADO === 'Cargado' && (
-                          <span role='img' aria-label='check'>
-                            Cargado ✔️
-                          </span>
-                        )}
-                        {expediente.VCHESTADO === 'No Cargado' && (
-                          <span role='img' aria-label='check'>
-                            No Cargado ❌
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{expediente.VCHFECHACARDA}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
+        {renderUploadStatus()}
+        {renderErrorSection()}
+        {renderExpedientesHistoricos()}
       </Card>
       <ModalCarteraAlerta isOpen={isOpen} onOpen={onOpen} onOpenChange={onOpenChange} />
     </>

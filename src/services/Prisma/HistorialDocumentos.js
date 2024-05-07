@@ -15,6 +15,7 @@ export async function obtenerExpedienteHisto() {
 export async function crearRegistroHistorial(
   nomdoc,
   cantexp,
+  cantexpfail,
   estado,
   fechacarga
 ) {
@@ -25,6 +26,7 @@ export async function crearRegistroHistorial(
         VCHCANTEXP: cantexp,
         VCHESTADO: estado,
         VCHFECHACARDA: fechacarga,
+        VCHCANTEXPFALLOS: cantexpfail,
       },
     });
     return nuevoRegistro.NUMHISTORIALDOCSID; // Devolver el ID del nuevo registro
