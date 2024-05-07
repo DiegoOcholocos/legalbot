@@ -34,41 +34,41 @@ const FiltersDashboard = ({ handleFilters, estudio, filtros }) => {
       <h3 className='text-md font-bold gap-4'>Buscar por Filtros</h3>
       <div className='flex flex-col gap-0'>
         <label className='text-sm font-medium'>Seleccione un distrito judicial :</label>
-        <Autocomplete
-          onSelectionChange={(value) => onSelectionChange('distrito', value)}
-          defaultSelectedKey={filtros?.distrito}
-        >
-          {distritos.map((distrito) => (
-            <AutocompleteItem key={distrito} value={distrito}>
-              {distrito}
-            </AutocompleteItem>
-          ))}
+        <Autocomplete onSelectionChange={(value) => onSelectionChange('distrito', value)}>
+          {distritos.map(
+            (distrito) =>
+              distrito && (
+                <AutocompleteItem key={distrito} value={distrito}>
+                  {distrito}
+                </AutocompleteItem>
+              )
+          )}
         </Autocomplete>
       </div>
       <div className='flex flex-col gap-0'>
         <label className='text-sm font-medium'>Seleccione un estado :</label>
-        <Autocomplete
-          onSelectionChange={(value) => onSelectionChange('estado', value)}
-          defaultSelectedKey={filtros?.estado}
-        >
-          {estados.map((estado) => (
-            <AutocompleteItem key={estado} value={estado}>
-              {estado}
-            </AutocompleteItem>
-          ))}
+        <Autocomplete onSelectionChange={(value) => onSelectionChange('estado', value)}>
+          {estados.map(
+            (estado) =>
+              estado && (
+                <AutocompleteItem key={estado} value={estado}>
+                  {estado}
+                </AutocompleteItem>
+              )
+          )}
         </Autocomplete>
       </div>
       <div className='flex flex-col gap-0'>
         <label className='text-sm font-medium'>Seleccione una especialidad :</label>
-        <Autocomplete
-          onSelectionChange={(value) => onSelectionChange('especialidad', value)}
-          defaultSelectedKey={filtros?.especialidad}
-        >
-          {especialidades.map((especialidad) => (
-            <AutocompleteItem key={especialidad} value={especialidad}>
-              {especialidad}
-            </AutocompleteItem>
-          ))}
+        <Autocomplete onSelectionChange={(value) => onSelectionChange('especialidad', value)}>
+          {especialidades.map(
+            (especialidad) =>
+              especialidad && (
+                <AutocompleteItem key={especialidad} value={especialidad}>
+                  {especialidad}
+                </AutocompleteItem>
+              )
+          )}
         </Autocomplete>
       </div>
     </>
