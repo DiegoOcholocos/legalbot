@@ -8,98 +8,69 @@ import {
 } from '@/services/Prisma/Expediente';
 import { GrPowerReset } from 'react-icons/gr';
 
-const FiltersDashboard = ({ handleFilters, estudio }) => {
+const FiltersDashboard = ({ handleFilters, estudio, filtros }) => {
   const [distritos, setDistritos] = useState([]);
   const [estados, setEstados] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({
-    distrito: null,
-    estado: null,
-    especialidad: null,
-  });
-
   useEffect(() => {
-    obtenerDistritosJudicialesExpedientes({}, estudio)
+    obtenerDistritosJudicialesExpedientes(filtros, estudio)
       .then((res) => setDistritos(res.map((distrito) => distrito.DistritoJudicial)))
       .catch((error) => console.error('Error fetching districts:', error));
 
-    obntenerEstadosExpedientes({}, estudio)
+    obntenerEstadosExpedientes(filtros, estudio)
       .then((res) => setEstados(res.map((estado) => estado.Estado)))
       .catch((error) => console.error('Error fetching states:', error));
 
-    obntenerEspecialidadesExpedientes({}, estudio)
+    obntenerEspecialidadesExpedientes(filtros, estudio)
       .then((res) => setEspecialidades(res.map((especialidad) => especialidad.Especialidad)))
       .catch((error) => console.error('Error fetching specialties:', error));
-  }, [estudio]); // Make sure to include estudio in the dependency array
+  }, [filtros]);
 
   const onSelectionChange = (id, value) => {
-    setSelectedFilters({ ...selectedFilters, [id]: value });
-  };
-
-  const handleFilterClick = () => {
-    const selectedTextFilters = {
-      distrito: selectedFilters.distrito !== null ? distritos[selectedFilters.distrito] : null,
-      estado: selectedFilters.estado !== null ? estados[selectedFilters.estado] : null,
-      especialidad:
-        selectedFilters.especialidad !== null ? especialidades[selectedFilters.especialidad] : null,
-    };
-    handleFilters(selectedTextFilters);
-  };
-
-  const handleReset = () => {
-    setSelectedFilters({
-      distrito: null,
-      estado: null,
-      especialidad: null,
-    });
-    handleFilters({});
+    handleFilters({ ...filtros, [id]: value });
   };
 
   return (
     <>
       <h3 className='text-md font-bold gap-4'>Buscar por Filtros</h3>
-      <Autocomplete
-        label='Seleccione un distrito judicial'
-        onSelectionChange={(value) => onSelectionChange('distrito', value)}
-        defaultSelectedKey={selectedFilters.distrito !== null ? selectedFilters.distrito : -1}
-      >
-        {distritos.map((distrito, index) => (
-          <AutocompleteItem key={index} value={index}>
-            {distrito}
-          </AutocompleteItem>
-        ))}
-      </Autocomplete>
-      <Autocomplete
-        label='Seleccione un estado'
-        onSelectionChange={(value) => onSelectionChange('estado', value)}
-        defaultSelectedKey={selectedFilters.estado !== null ? selectedFilters.estado : -1}
-      >
-        {estados.map((estado, index) => (
-          <AutocompleteItem key={index} value={index}>
-            {estado}
-          </AutocompleteItem>
-        ))}
-      </Autocomplete>
-      <Autocomplete
-        label='Seleccione una especialidad'
-        onSelectionChange={(value) => onSelectionChange('especialidad', value)}
-        defaultSelectedKey={
-          selectedFilters.especialidad !== null ? selectedFilters.especialidad : -1
-        }
-      >
-        {especialidades.map((especialidad, index) => (
-          <AutocompleteItem key={index} value={index}>
-            {especialidad}
-          </AutocompleteItem>
-        ))}
-      </Autocomplete>
-      <div className='flex justify-between mt-4'>
-        <Button color='primary' onClick={handleFilterClick} className='w-2/5'>
-          Filtrar
-        </Button>
-        <Button color='error' onClick={handleReset} className='w-2/5'>
-          <GrPowerReset />
-        </Button>
+      <div className='flex flex-col gap-0'>
+        <label className='text-sm font-medium'>Seleccione un distrito judicial :</label>
+        <Autocomplete
+          onSelectionChange={(value) => onSelectionChange('distrito', value)}
+          defaultSelectedKey={filtros?.distrito || ''}
+        >
+          {distritos.map((distrito, index) => (
+            <AutocompleteItem key={distrito} value={distrito}>
+              {distrito}
+            </AutocompleteItem>
+          ))}
+        </Autocomplete>
+      </div>
+      <div className='flex flex-col gap-0'>
+        <label className='text-sm font-medium'>Seleccione un estado :</label>
+        <Autocomplete
+          onSelectionChange={(value) => onSelectionChange('estado', value)}
+          defaultSelectedKey={filtros?.estado || ''}
+        >
+          {estados.map((estado, index) => (
+            <AutocompleteItem key={estado} value={estado}>
+              {estado}
+            </AutocompleteItem>
+          ))}
+        </Autocomplete>
+      </div>
+      <div className='flex flex-col gap-0'>
+        <label className='text-sm font-medium'>Seleccione una especialidad :</label>
+        <Autocomplete
+          onSelectionChange={(value) => onSelectionChange('especialidad', value)}
+          defaultSelectedKey={filtros?.especialidad || ''}
+        >
+          {especialidades.map((especialidad, index) => (
+            <AutocompleteItem key={especialidad} value={especialidad}>
+              {especialidad}
+            </AutocompleteItem>
+          ))}
+        </Autocomplete>
       </div>
     </>
   );

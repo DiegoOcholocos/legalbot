@@ -13,15 +13,7 @@ import {
   BarElement,
   Title,
 } from 'chart.js';
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title
-);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 const BarDashboard = ({ values, labels, title, descripcion, tipo }) => {
   const dataBar = {
     labels: labels,
@@ -45,11 +37,11 @@ const BarDashboard = ({ values, labels, title, descripcion, tipo }) => {
 
   return (
     <Card className='w-full h-full'>
-      <CardHeader className='flex gap-3'>
+      <CardHeader className='flex gap-3 w-full justify-center'>
         <Popover placement='right-start'>
           <PopoverTrigger>
-            <div className='flex items-center gap-1'>
-              <p className='text-md font-bold'>{title}</p>
+            <div className='flex items-center gap-2'>
+              <p className='text-lg text-center font-bold'>{title}</p>
               <RxInfoCircled />
             </div>
           </PopoverTrigger>
