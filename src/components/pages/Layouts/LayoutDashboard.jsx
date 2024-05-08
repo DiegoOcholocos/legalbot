@@ -4,24 +4,17 @@ import Link from 'next/link';
 import { Button, Card } from '@nextui-org/react';
 import { menu } from '../../../services/data';
 import Image from 'next/image';
-import {
-  RxDoubleArrowLeft,
-  RxDoubleArrowRight,
-  RxHamburgerMenu,
-} from 'react-icons/rx';
+import { RxDoubleArrowLeft, RxDoubleArrowRight, RxHamburgerMenu } from 'react-icons/rx';
 import ButtonTheme from '@/components/utils/system/ButtonTheme';
 import { ButtonLogout } from '@/components/auth/ButtonSession';
 
 const LayoutDashboard = ({ children, session, estudio }) => {
   const [collapsed, setSidebarCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
-  console.log(menu)
   return (
     <div
       className={`grid min-h-screen ${
-        !collapsed
-          ? 'grid-cols-sidebar-sm md:grid-cols-sidebar-md'
-          : 'grid-cols-sidebar-collapsed'
+        !collapsed ? 'grid-cols-sidebar-sm md:grid-cols-sidebar-md' : 'grid-cols-sidebar-collapsed'
       } transition-grid-template-columns duration-300 ease-in-out`}
     >
       <Sidebar
@@ -62,10 +55,7 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
             {!collapsed && (
               <>
                 <h1 className='font-bold text-lg md:text-2xl mb-4'>
-                  Track{' '}
-                  <span className='font-bold text-lg  md:text-2xl text-primary-400'>
-                    Exp
-                  </span>
+                  Track <span className='font-bold text-lg  md:text-2xl text-primary-400'>Exp</span>
                 </h1>
                 <h2 className='text-md font-semibold uppercase'>
                   {session.user.email.split('@')[0]}{' '}
@@ -78,9 +68,12 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
 
         <nav className='flex-grow w-full justify-between flex flex-col p-2'>
           <ul className='flex flex-col gap-2 items-stretch'>
-            {menu.map((item) => ( <>
+            {menu.map((item) => (
+              <>
                 {item.permisos?.includes(session.user.tipoUsuario) && (
                   <ItemSidebar
+                    user={session.user}
+                    permisos={item.permisos}
                     key={item.nombre}
                     icon={item.icon}
                     nombre={item.nombre}
@@ -101,28 +94,20 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
           className='w-full rounded-lg h-10 hidden md:block md:flex justify-center items-center'
           onClick={() => setCollapsed(!collapsed)}
         >
-          {collapsed ? (
-            <RxDoubleArrowRight size={20} />
-          ) : (
-            <RxDoubleArrowLeft size={20} />
-          )}
+          {collapsed ? <RxDoubleArrowRight size={20} /> : <RxDoubleArrowLeft size={20} />}
         </Button>
       </div>
     </Card>
   );
 };
 
-const ItemSidebar = ({ icon, nombre, menu, collapsed }) => {
+const ItemSidebar = ({ user, permisos, key, icon, nombre, menu, collapsed }) => {
   return (
     <li
       key={nombre}
       className={`
         flex hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-300
-        ${
-          !collapsed
-            ? 'rounded-md p-2 mx-3 gap-4'
-            : 'rounded-full p-2 mx-3 w-10 h-10'
-        }
+        ${!collapsed ? 'rounded-md p-2 mx-3 gap-4' : 'rounded-full p-2 mx-3 w-10 h-10'}
       `}
     >
       <Link href={menu[0].href} className='flex gap-2'>
