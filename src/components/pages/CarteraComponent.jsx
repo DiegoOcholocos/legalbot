@@ -31,7 +31,7 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   const [errors, setErrors] = useState([]);
   const [errorCount, setErrorCount] = useState(0);
   const router = useRouter();
-  const [totalDatos, setTotalDatos] = useState(countExpedienteNum);
+  const [totalDatos, setTotalDatos] = useState(countExpedienteNum); ///Actualize datos al cargar archivos
   const [expedientes, setExpedientes] = useState(historialDocumentos);
   const [idArchivo, setIdArchivo] = useState('');
   const [contArchivoT, setContArchivoT] = useState(0);
