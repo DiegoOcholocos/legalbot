@@ -17,6 +17,10 @@ export default function LoginComponent() {
 
   const toggleVisibility = () => setIsVisible(!isVisible);
   const handleLogin = async () => {
+    setIsButtonDisabled(true);
+    setError(null); 
+    setLoading(true);
+    setError(null);
     const res = await signIn('credentials', {
       username: usuario.usuario,
       password: usuario.pasword,
@@ -28,10 +32,13 @@ export default function LoginComponent() {
       if (error.newPasswordRequired) {
         setNewPassword(true);
       } else {
+        setIsLoadingButton(false);
         setError(error.mensaje);
         setLoading(false);
+        setIsButtonDisabled(false);
       }
     } else {
+      setIsLoadingButton(true);
       const callbackUrl = await obtenerValorCallbackUrl(res.url);
       router.push(callbackUrl == null ? '/dashboard' : callbackUrl);
     }
@@ -313,7 +320,7 @@ export default function LoginComponent() {
               onClick={async () => {
                 setIsLoadingButton(true);
                 await handleLogin();
-                setIsLoadingButton(false);
+
               }}
             >
               {isLoadingButton ? 'Cargando...' : 'Iniciar Sesión'}
