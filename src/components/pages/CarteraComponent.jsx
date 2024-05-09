@@ -14,6 +14,7 @@ import {
 import ExcelJS from 'exceljs';
 import { useRouter } from 'next/navigation';
 import { crearRegistroCargas, registroMasivo } from '@/services/Prisma/Expediente';
+import { Chip } from '@nextui-org/react';
 import {
   crearRegistroHistorial,
   actualizarRegistro,
@@ -24,6 +25,7 @@ import ModalCarteraAlerta from '@/components/utils/modals/ModalCarteraAlerta';
 import { crearRegistroMasivo } from '@/services/Prisma/Estudio';
 
 const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
+  console.log(process.env.LIMIT_WALLET);
   const [excelData, setExcelData] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [validFormat, setValidFormat] = useState(null);
@@ -257,6 +259,8 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         const expedientesData = await obtenerExpedienteHisto();
         setExpedientes(expedientesData);
 
+        setTotalDatos(prevTotal => prevTotal + expedientesCargados);
+
         setUploadCompleted(true); // Indica que la carga ha finalizado
         setUploading(false);
       } catch (error) {
@@ -269,7 +273,6 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
         setUploadCompleted(false);
         setErrors([]);
         setErrorCount(0);
-        setTotalDatos(0);
         setContArchivoT(0);
         setPorcentaje(0);
         setIdArchivo('');
@@ -430,24 +433,60 @@ const CarteraComponent = ({ historialDocumentos, countExpedienteNum }) => {
   return (
     <>
       <Title title='Cartera de Expedientes' />
+      <div className='flex flex-wrap gap-4 p-4 md:grid md:grid-cols-2 lg:grid-cols-3'>
+      <div className='flex flex-col items-center w-full px-4 py-2 md:max-w-1/2 lg:max-w-full' key={'a'}>
+            <Card className='flex flex-col justify-between items-center w-full h-full p-4 rounded-xl'>
+              <div className='flex flex-col items-center'>
+                <div className='mb-2'>Limite de Expedientes</div>
+                <div className='flex justify-center items-center h-10 w-10'>
+                    <Chip
+                      color='primary'
+                      className='cursor-pointer w-auto'
+                    >
+                      {limite}
+                    </Chip>
+                </div>
+              </div>
+              
+            </Card>
+          </div>
+          <div className='flex flex-col items-center w-full px-4 py-2 md:max-w-1/2 lg:max-w-full' key={'a'}>
+            <Card className='flex flex-col justify-between items-center w-full h-full p-4 rounded-xl'>
+              <div className='flex flex-col items-center'>
+                <div className='mb-2'>Expedientes Cargados</div>
+                <div className='flex justify-center items-center h-10 w-10'>
+                    <Chip
+                      color='primary'
+                      className='cursor-pointer w-auto'
+                    >
+                      {totalDatos}
+                    </Chip>
+                </div>
+              </div>
+              
+            </Card>
+          </div>
+          <div className='flex flex-col items-center w-full px-4 py-2 md:max-w-1/2 lg:max-w-full' key={'a'}>
+            <Card className='flex flex-col justify-between items-center w-full h-full p-4 rounded-xl'>
+              <div className='flex flex-col items-center'>
+                <div className='mb-2'>Expedientes Disponible</div>
+                <div className='flex justify-center items-center h-10 w-10'>
+                    <Chip
+                      color='primary'
+                      className='cursor-pointer w-auto'
+                    >
+                      {limite - totalDatos}
+                    </Chip>
+                </div>
+              </div>
+              
+            </Card>
+          </div>
+      </div>
       <Card className='p-4 rounded-lg mx-4 flex flex-col gap-4'>
         <label className='font-bold text-md' htmlFor='file_input'>
           Expedientes :
         </label>
-        <Table aria-label='Example static collection table' className='center'>
-          <TableHeader>
-            <TableColumn>Limite de Expedientes</TableColumn>
-            <TableColumn>Expedientes Cargados</TableColumn>
-            <TableColumn>Expedientes Disponible</TableColumn>
-          </TableHeader>
-          <TableBody>
-            <TableRow key='1'>
-              <TableCell>{limite}</TableCell>
-              <TableCell>{totalDatos}</TableCell>
-              <TableCell>{limite - totalDatos}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
         {renderFileUploadSection()}
         <h3>Porcentaje de Expedientes Subidos :{porcentaje ? porcentaje + '%' : '0%'} ⌛</h3>
         {renderUploadStatus()}
