@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button, Card } from '@nextui-org/react';
 import { menu } from '../../../services/data';
 import Image from 'next/image';
+import { useEffect } from 'react';
 import { RxDoubleArrowLeft, RxDoubleArrowRight, RxHamburgerMenu } from 'react-icons/rx';
 import ButtonTheme from '@/components/utils/system/ButtonTheme';
 import { ButtonLogout } from '@/components/auth/ButtonSession';
@@ -11,6 +12,20 @@ import { ButtonLogout } from '@/components/auth/ButtonSession';
 const LayoutDashboard = ({ children, session, estudio }) => {
   const [collapsed, setSidebarCollapsed] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarCollapsed(false)
+        setShowSidebar(false);
+      } else if (!collapsed) {
+        setShowSidebar(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [collapsed]);
   return (
     <div
       className={`grid min-h-screen ${
@@ -25,7 +40,7 @@ const LayoutDashboard = ({ children, session, estudio }) => {
         estudio={estudio}
       />
       <div className='w-full max-h-screen flex flex-col overflow-x-hidden'>
-        <Navbar onMenuButtonClick={() => setShowSidebar((prev) => !prev)} />
+        <Navbar onMenuButtonClick={() => setShowSidebar((prev) => !prev)} collapsed={collapsed} />
         <div className='flex-1 w-full h-full p-4'>{children}</div>
       </div>
     </div>
@@ -36,10 +51,9 @@ export default LayoutDashboard;
 const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
   return (
     <Card
-      className={`
-        z-20 transition-all duration-300 ease-in-out fixed md:static md:translate-x-0 rounded-r-lg rounded-l-none md:w-full w-[200px] '
-        ${!shown ? '-translate-x-full' : ''}
-      `}
+      className={`z-20 transition-all duration-300 ease-in-out fixed md:static md:translate-x-0 rounded-r-lg rounded-l-none md:w-full w-[200px] ${
+        !shown ? 'hidden' : ''
+      }`}
     >
       <div className='flex flex-col justify-between h-screen sticky inset-0 w-full'>
         <div
@@ -117,7 +131,8 @@ const ItemSidebar = ({ user, permisos, key, icon, nombre, menu, collapsed }) => 
   );
 };
 
-const Navbar = ({ onMenuButtonClick }) => {
+const Navbar = ({ onMenuButtonClick,collapsed }) => {
+  console.log("Estado collapse",collapsed)
   return (
     <div className='md:hidden flex justify-end items-center w-screen md:w-full sticky z-50 py-4 px-8'>
       <Button onClick={onMenuButtonClick}>
