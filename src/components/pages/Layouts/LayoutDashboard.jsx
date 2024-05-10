@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button, Card } from '@nextui-org/react';
 import { menu } from '../../../services/data';
+
 import Image from 'next/image';
 import { useEffect } from 'react';
 import { RxDoubleArrowLeft, RxDoubleArrowRight, RxHamburgerMenu } from 'react-icons/rx';

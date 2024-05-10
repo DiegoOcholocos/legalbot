@@ -5,12 +5,13 @@ import Image from 'next/image';
 import Imagen from './images/image.jpg';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+
 import { Chip } from '@nextui-org/react';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 export default function LoginComponent() {
   const [usuario, setUsuario] = useState({});
   const router = useRouter();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); //
   const [newPassword, setNewPassword] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = React.useState(false);
