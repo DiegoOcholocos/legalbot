@@ -21,6 +21,7 @@ import { obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerActividadesPorFlujo, obtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { crearExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
+import { obtenerFechasFeriados } from '@/services/Prisma/fechas';
 export default function DetalleExpedienteTarea({
   expedientedata,
   flujos,
@@ -31,6 +32,7 @@ export default function DetalleExpedienteTarea({
   const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [flujoId, setFlujoId] = useState('');
+  const [feriados, setFeriados] = useState([]);
   const [actividades, setActividades] = useState([]);
   useEffect(() => {
     (async () => {
@@ -39,6 +41,14 @@ export default function DetalleExpedienteTarea({
       setTareasExpediente(data);
       console.log(data);
       console.log(flujos);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const feriadosData = await obtenerFechasFeriados();
+      const feriadosFormat = feriadosData.map((feriado) => new Date(feriado.FECHA).toDateString());
+      setFeriados(feriadosFormat);
     })();
   }, []);
 
@@ -69,21 +79,29 @@ export default function DetalleExpedienteTarea({
     //   handleAsignTask(Tarea);
     // }
   };
-  function agregarDias(fecha, dias) {
-    const resultado = new Date(fecha);
-    resultado.setDate(resultado.getDate() + dias);
-    return resultado;
+  function agregarDiasLaborables(fechaInicio, numDias) {
+    let fecha = new Date(fechaInicio);
+    let diasAgregados = 0;
+    while (diasAgregados < numDias) {
+      fecha.setDate(fecha.getDate() + 1);
+      const diaDeLaSemana = fecha.getDay();
+      const esFeriado = feriados.includes(fecha.toDateString());
+
+      if (!esFeriado && diaDeLaSemana !== 0 && diaDeLaSemana !== 6) {
+        diasAgregados++;
+      }
+    }
+    return fecha;
   }
+
   const handleAsignTask = async (tarea) => {
-    const fechaculminacion = new Date().getDate() + tarea.NUMDIASDURACIONN;
-    console.log('Esta es la fecha para culminar ', fechaculminacion);
     try {
       const dataTarea = {
         VCHESTADO: 'pendiente',
         expedienteid: expedientedata.ExpedienteId,
         NUMTAREAID: tarea.NUMTAREAID,
         FECHAINICIO: new Date(),
-        FECFECHACULMINACION: agregarDias(new Date(),tarea.NUMDIASDURACIONN),
+        FECFECHACULMINACION: agregarDiasLaborables(new Date(), tarea.NUMDIASDURACION),
         FECHFECHACREACION: new Date(),
       };
 

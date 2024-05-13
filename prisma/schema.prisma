@@ -228,3 +228,8 @@ model TE_USUARIO {
   NUMESTUDIOID  Int?
   TE_ESTUDIO    TE_ESTUDIO? @relation(fields: [NUMESTUDIOID], references: [NUMESTUDIOID])
 }
+model TE_FERIADOS_PERU {
+  NUMFERIADOSID  Int         @id @default(autoincrement())
+  DESCRIPCION     String?
+  FECHA     DateTime?
+}
