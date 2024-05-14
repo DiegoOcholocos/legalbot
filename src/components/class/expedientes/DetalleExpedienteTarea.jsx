@@ -117,7 +117,7 @@ export default function DetalleExpedienteTarea({
   };
   return (
     <>
-      {tareasExpediente.length && (
+      {tareasExpediente.length > 0 && (
         <Card>
           <CardHeader>Recarge la pagina porfavor</CardHeader>
         </Card>
@@ -140,23 +140,27 @@ export default function DetalleExpedienteTarea({
             )}
             {flujos.length && (
               <div className='flex items-center gap-4'>
-                <Autocomplete
-                  label='Elegir un flujo'
-                  className='max-w-xs'
-                  onSelectionChange={setFlujoId}
-                >
-                  {flujos.map((flujo) => (
-                    <AutocompleteItem key={flujo.NUMFLUJOID} value={flujo.VCHNOMBRE}>
-                      {flujo.VCHNOMBRE}
-                    </AutocompleteItem>
-                  ))}
-                </Autocomplete>
+                <div className='relative'>
+                  <select
+                    className='border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500'
+                    onChange={(e) => setFlujoId(e.target.value)}
+                  >
+                    <option value='' disabled selected>
+                      Elegir un flujo
+                    </option>
+                    {flujos.map((flujo) => (
+                      <option key={flujo.NUMFLUJOID} value={flujo.NUMFLUJOID}>
+                        {flujo.VCHNOMBRE}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <Button
-                  className='py-2 px-4 rounded-md '
+                  className='py-2 px-4 rounded-md'
                   size='md'
                   onPress={() => handleAsignWorflow()}
                 >
-                  Asginar flujo
+                  Asignar flujo
                 </Button>
               </div>
             )}
