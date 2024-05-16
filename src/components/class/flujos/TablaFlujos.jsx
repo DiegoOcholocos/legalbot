@@ -77,7 +77,7 @@ export default function TablaFlujos({ totFlujos, setTotFlujos }) {
                   <p className='text-center uppercase'>{flujo.VCHNOMBRE}</p>
                 </TableCell>
                 <TableCell>
-                  <p className='text-center uppercase'>10</p>
+                  <p className='text-center uppercase'>{flujo.NUMCANTIDADDEEXPEDIENTES}</p>
                 </TableCell>
                 <TableCell>
                   <p className='text-center uppercase'>

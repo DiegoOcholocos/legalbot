@@ -17,7 +17,7 @@ import {
   AccordionItem,
 } from '@nextui-org/react';
 import { obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
-import { obtenerFlujo } from '@/services/Prisma/Flujo';
+import { cantidadExpedientes, obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerActividadesPorFlujo, obtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { crearExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
@@ -74,7 +74,7 @@ export default function DetalleExpedienteTarea({
         console.log('TAREA DENTRO DEL ARREGLO ', tarea);
       }
     }
-
+    await cantidadExpedientes(flujoData.NUMFLUJOID);
     // for (const Tarea of actividadesData['TAREAS']) {
     //   handleAsignTask(Tarea);
     // }
