@@ -17,10 +17,11 @@ import {
   AccordionItem,
 } from '@nextui-org/react';
 import { obtenerExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
-import { obtenerFlujo } from '@/services/Prisma/Flujo';
+import { cantidadExpedientes, obtenerFlujo } from '@/services/Prisma/Flujo';
 import { obtenerActividadesPorFlujo, obtenerTareasporActividad } from '@/services/Prisma/Actividad';
 import { crearExpedienteTarea } from '@/services/Prisma/ExpedienteTarea';
 import { obtenerTareasActividad } from '@/services/Prisma/Tarea';
+import { obtenerFechasFeriados } from '@/services/Prisma/fechas';
 export default function DetalleExpedienteTarea({
   expedientedata,
   flujos,
@@ -31,6 +32,7 @@ export default function DetalleExpedienteTarea({
   const [mostrarFlujoData, setMostrarFlujoData] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [flujoId, setFlujoId] = useState('');
+  const [feriados, setFeriados] = useState([]);
   const [actividades, setActividades] = useState([]);
   useEffect(() => {
     (async () => {
@@ -39,6 +41,14 @@ export default function DetalleExpedienteTarea({
       setTareasExpediente(data);
       console.log(data);
       console.log(flujos);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const feriadosData = await obtenerFechasFeriados();
+      const feriadosFormat = feriadosData.map((feriado) => new Date(feriado.FECHA).toDateString());
+      setFeriados(feriadosFormat);
     })();
   }, []);
 
@@ -64,26 +74,34 @@ export default function DetalleExpedienteTarea({
         console.log('TAREA DENTRO DEL ARREGLO ', tarea);
       }
     }
-
+    await cantidadExpedientes(flujoData.NUMFLUJOID);
     // for (const Tarea of actividadesData['TAREAS']) {
     //   handleAsignTask(Tarea);
     // }
   };
-  function agregarDias(fecha, dias) {
-    const resultado = new Date(fecha);
-    resultado.setDate(resultado.getDate() + dias);
-    return resultado;
+  function agregarDiasLaborables(fechaInicio, numDias) {
+    let fecha = new Date(fechaInicio);
+    let diasAgregados = 0;
+    while (diasAgregados < numDias) {
+      fecha.setDate(fecha.getDate() + 1);
+      const diaDeLaSemana = fecha.getDay();
+      const esFeriado = feriados.includes(fecha.toDateString());
+
+      if (!esFeriado && diaDeLaSemana !== 0 && diaDeLaSemana !== 6) {
+        diasAgregados++;
+      }
+    }
+    return fecha;
   }
+
   const handleAsignTask = async (tarea) => {
-    const fechaculminacion = new Date().getDate() + tarea.NUMDIASDURACIONN;
-    console.log('Esta es la fecha para culminar ', fechaculminacion);
     try {
       const dataTarea = {
         VCHESTADO: 'pendiente',
         expedienteid: expedientedata.ExpedienteId,
         NUMTAREAID: tarea.NUMTAREAID,
         FECHAINICIO: new Date(),
-        FECFECHACULMINACION: agregarDias(new Date(),tarea.NUMDIASDURACIONN),
+        FECFECHACULMINACION: agregarDiasLaborables(new Date(), tarea.NUMDIASDURACION),
         FECHFECHACREACION: new Date(),
       };
 
@@ -99,7 +117,7 @@ export default function DetalleExpedienteTarea({
   };
   return (
     <>
-      {tareasExpediente.length && (
+      {tareasExpediente.length > 0 && (
         <Card>
           <CardHeader>Recarge la pagina porfavor</CardHeader>
         </Card>
@@ -122,23 +140,27 @@ export default function DetalleExpedienteTarea({
             )}
             {flujos.length && (
               <div className='flex items-center gap-4'>
-                <Autocomplete
-                  label='Elegir un flujo'
-                  className='max-w-xs'
-                  onSelectionChange={setFlujoId}
-                >
-                  {flujos.map((flujo) => (
-                    <AutocompleteItem key={flujo.NUMFLUJOID} value={flujo.VCHNOMBRE}>
-                      {flujo.VCHNOMBRE}
-                    </AutocompleteItem>
-                  ))}
-                </Autocomplete>
+                <div className='relative'>
+                  <select
+                    className='border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500'
+                    onChange={(e) => setFlujoId(e.target.value)}
+                  >
+                    <option value='' disabled selected>
+                      Elegir un flujo
+                    </option>
+                    {flujos.map((flujo) => (
+                      <option key={flujo.NUMFLUJOID} value={flujo.NUMFLUJOID}>
+                        {flujo.VCHNOMBRE}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <Button
-                  className='py-2 px-4 rounded-md '
+                  className='py-2 px-4 rounded-md'
                   size='md'
                   onPress={() => handleAsignWorflow()}
                 >
-                  Asginar flujo
+                  Asignar flujo
                 </Button>
               </div>
             )}

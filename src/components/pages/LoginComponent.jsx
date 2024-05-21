@@ -5,18 +5,23 @@ import Image from 'next/image';
 import Imagen from './images/image.jpg';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+
 import { Chip } from '@nextui-org/react';
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa';
 export default function LoginComponent() {
   const [usuario, setUsuario] = useState({});
   const router = useRouter();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); //
   const [newPassword, setNewPassword] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = React.useState(false);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
   const handleLogin = async () => {
+    setIsButtonDisabled(true);
+    setError(null); 
+    setLoading(true);
+    setError(null);
     const res = await signIn('credentials', {
       username: usuario.usuario,
       password: usuario.pasword,
@@ -28,10 +33,13 @@ export default function LoginComponent() {
       if (error.newPasswordRequired) {
         setNewPassword(true);
       } else {
+        setIsLoadingButton(false);
         setError(error.mensaje);
         setLoading(false);
+        setIsButtonDisabled(false);
       }
     } else {
+      setIsLoadingButton(true);
       const callbackUrl = await obtenerValorCallbackUrl(res.url);
       router.push(callbackUrl == null ? '/dashboard' : callbackUrl);
     }
@@ -313,7 +321,7 @@ export default function LoginComponent() {
               onClick={async () => {
                 setIsLoadingButton(true);
                 await handleLogin();
-                setIsLoadingButton(false);
+
               }}
             >
               {isLoadingButton ? 'Cargando...' : 'Iniciar Sesión'}
