@@ -19,7 +19,7 @@ export default function LoginComponent() {
   const toggleVisibility = () => setIsVisible(!isVisible);
   const handleLogin = async () => {
     setIsButtonDisabled(true);
-    setError(null); 
+    setError(null);
     setLoading(true);
     setError(null);
     const res = await signIn('credentials', {
@@ -32,6 +32,9 @@ export default function LoginComponent() {
       const error = JSON.parse(res.error.slice(7));
       if (error.newPasswordRequired) {
         setNewPassword(true);
+        setIsButtonDisabled(false);
+        setIsLoadingButton(false);
+        setLoading(false);
       } else {
         setIsLoadingButton(false);
         setError(error.mensaje);
@@ -142,90 +145,74 @@ export default function LoginComponent() {
   }, [usuario.usuario, usuario.pasword]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen w-full">
-      <Card className="flex flex-row m-6 space-y-8 shadow-2xl rounded-2xl md:space-y-0 w-auto">
-        <div className="flex flex-col justify-center p-8 md:p-14 max-w-[550px] w-[550px]">
-          <span className="mb-3 text-2xl md:text-4xl font-bold">
-            Bienvenido
-          </span>
+    <div className='flex items-center justify-center min-h-screen w-full'>
+      <Card className='flex flex-row m-6 space-y-8 shadow-2xl rounded-2xl md:space-y-0 w-auto'>
+        <div className='flex flex-col justify-center p-8 md:p-14 max-w-[550px] w-[550px]'>
+          <span className='mb-3 text-2xl md:text-4xl font-bold'>Bienvenido</span>
           {newPassword ? (
-            <span className="font-light text-sm md:text-xl text-gray-400 mb-4">
+            <span className='font-light text-sm md:text-xl text-gray-400 mb-4'>
               Ingrese su nueva contraseña
             </span>
           ) : (
-            <span className="font-light text-sm md:text-xl text-gray-400 mb-4">
+            <span className='font-light text-sm md:text-xl text-gray-400 mb-4'>
               Ingrese sus datos
             </span>
           )}
 
           {error && (
-            <Chip color="danger" className="mb-4 w-full text-wrap">
+            <Chip color='danger' className='mb-4 w-full text-wrap'>
               {error}
             </Chip>
           )}
           {newPassword ? (
             <>
-              <div className="py-4 relative">
-                <span className="mb-2 text-sm md:text-md">
-                  Nueva Contraseña
-                </span>
+              <div className='py-4 relative'>
+                <span className='mb-2 text-sm md:text-md'>Nueva Contraseña</span>
                 <Input
-                  type="password"
-                  variant="bordered"
-                  color={
-                    !isPasswordValid || (isFocused && !isPasswordValid)
-                      ? 'danger'
-                      : 'default'
-                  }
-                  name="newPassword"
-                  id="newPassword"
+                  type='password'
+                  variant='bordered'
+                  color={!isPasswordValid || (isFocused && !isPasswordValid) ? 'danger' : 'default'}
+                  name='newPassword'
+                  id='newPassword'
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
-                  onChange={(e) =>
-                    setUsuario({ ...usuario, newPassword: e.target.value })
-                  }
+                  onChange={(e) => setUsuario({ ...usuario, newPassword: e.target.value })}
                   value={usuario.newPassword || ''}
                 />
                 {isFocused && (
-                  <div className="md:absolute -right-96 top-0 p-4 backdrop-blur-lg bg-white/70 rounded-lg z-40 ">
+                  <div className='md:absolute -right-96 top-0 p-4 backdrop-blur-lg bg-white/70 rounded-lg z-40 '>
                     {/* Condiciones de contraseña aquí */}
                     <PasswordConditionIndicator
                       condition={passwordConditions.containsNumber}
-                      label="Contiene al menos 1 número"
+                      label='Contiene al menos 1 número'
                     />
                     <PasswordConditionIndicator
                       condition={passwordConditions.containsSpecialChar}
-                      label="Contiene al menos 1 carácter especial"
+                      label='Contiene al menos 1 carácter especial'
                     />
                     <PasswordConditionIndicator
                       condition={passwordConditions.containsUpperCase}
-                      label="Contiene al menos una letra mayúscula"
+                      label='Contiene al menos una letra mayúscula'
                     />
                     <PasswordConditionIndicator
                       condition={passwordConditions.containsLowerCase}
-                      label="Contiene al menos una letra minúscula"
+                      label='Contiene al menos una letra minúscula'
                     />
                     <PasswordConditionIndicator
                       condition={passwordConditions.hasMinLength}
-                      label="Tiene al menos 8 caracteres"
+                      label='Tiene al menos 8 caracteres'
                     />
                   </div>
                 )}
               </div>
-              <div className="py-4 relative">
-                <span className="mb-2 text-sm md:text-md">
-                  Confirmar Contraseña
-                </span>
+              <div className='py-4 relative'>
+                <span className='mb-2 text-sm md:text-md'>Confirmar Contraseña</span>
                 <Input
-                  type="password"
-                  variant="bordered"
-                  color={
-                    usuario.newPassword !== usuario.newPasswordConfirm
-                      ? 'danger'
-                      : 'default'
-                  }
-                  name="newPasswordConfirm"
-                  id="newPasswordConfirm"
+                  type='password'
+                  variant='bordered'
+                  color={usuario.newPassword !== usuario.newPasswordConfirm ? 'danger' : 'default'}
+                  name='newPasswordConfirm'
+                  id='newPasswordConfirm'
                   onChange={(e) =>
                     setUsuario({
                       ...usuario,
@@ -238,39 +225,35 @@ export default function LoginComponent() {
             </>
           ) : (
             <>
-              <div className="py-4 relative">
-                <span className="mb-2 text-sm md:text-md">Usuario</span>
+              <div className='py-4 relative'>
+                <span className='mb-2 text-sm md:text-md'>Usuario</span>
                 <Input
-                  type="text"
-                  name="usuario"
-                  id="usuario"
-                  variant="bordered"
-                  onChange={(e) =>
-                    setUsuario({ ...usuario, usuario: e.target.value })
-                  }
+                  type='text'
+                  name='usuario'
+                  id='usuario'
+                  variant='bordered'
+                  onChange={(e) => setUsuario({ ...usuario, usuario: e.target.value })}
                 />
               </div>
-              <div className="py-4">
-                <span className="mb-2 text-sm md:text-md ">Contraseña</span>
-                <div className="relative">
+              <div className='py-4'>
+                <span className='mb-2 text-sm md:text-md '>Contraseña</span>
+                <div className='relative'>
                   <Input
-                    variant="bordered"
+                    variant='bordered'
                     type={isVisible ? 'text' : 'password'}
-                    name="contraseña"
-                    id="contraseña"
-                    onChange={(e) =>
-                      setUsuario({ ...usuario, pasword: e.target.value })
-                    }
+                    name='contraseña'
+                    id='contraseña'
+                    onChange={(e) => setUsuario({ ...usuario, pasword: e.target.value })}
                     endContent={
                       <button
-                        className="focus:outline-none"
-                        type="button"
+                        className='focus:outline-none'
+                        type='button'
                         onClick={toggleVisibility}
                       >
                         {isVisible ? (
-                          <FaRegEyeSlash className="text-2xl text-default-400 pointer-events-none" />
+                          <FaRegEyeSlash className='text-2xl text-default-400 pointer-events-none' />
                         ) : (
-                          <FaRegEye className="text-2xl text-default-400 pointer-events-none" />
+                          <FaRegEye className='text-2xl text-default-400 pointer-events-none' />
                         )}
                       </button>
                     }
@@ -279,14 +262,9 @@ export default function LoginComponent() {
               </div>
             </>
           )}
-          <div className="flex justify-between w-full py-4">
-            <div className="mr-24">
-              <Checkbox
-                defaultSelected
-                size="sm"
-                color="primary"
-                className="text-sm md:text-md"
-              >
+          <div className='flex justify-between w-full py-4'>
+            <div className='mr-24'>
+              <Checkbox defaultSelected size='sm' color='primary' className='text-sm md:text-md'>
                 Recordar Usuario
               </Checkbox>
             </div>
@@ -303,10 +281,7 @@ export default function LoginComponent() {
                 await confirmContraseña();
                 setIsLoadingButton(false);
               }}
-              disabled={
-                usuario.newPassword !== usuario.newPasswordConfirm ||
-                isLoadingButton
-              }
+              disabled={usuario.newPassword !== usuario.newPasswordConfirm || isLoadingButton}
             >
               {isLoadingButton ? 'Cargando...' : 'Confirmar'}
             </Button>
@@ -321,26 +296,24 @@ export default function LoginComponent() {
               onClick={async () => {
                 setIsLoadingButton(true);
                 await handleLogin();
-
               }}
             >
               {isLoadingButton ? 'Cargando...' : 'Iniciar Sesión'}
             </Button>
           )}
         </div>
-        <div className="relative">
+        <div className='relative'>
           <Image
             src={Imagen}
-            alt="img"
-            className="w-[400px] h-full hidden rounded-r-2xl md:block object-cover"
+            alt='img'
+            className='w-[400px] h-full hidden rounded-r-2xl md:block object-cover'
             width={500}
             height={500}
             priority
           />
-          <div className="absolute w-full hidden bottom-10 p-6 bg-white bg-opacity-30 backdrop-blur-sm rounded drop-shadow-lg md:block">
-            <span className="text-white text-xl">
-              Transformando la Experiencia en la Gestión de los procesos
-              judiciales.
+          <div className='absolute w-full hidden bottom-10 p-6 bg-white bg-opacity-30 backdrop-blur-sm rounded drop-shadow-lg md:block'>
+            <span className='text-white text-xl'>
+              Transformando la Experiencia en la Gestión de los procesos judiciales.
             </span>
           </div>
         </div>
