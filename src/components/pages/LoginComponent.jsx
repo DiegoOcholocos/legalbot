@@ -313,7 +313,8 @@ export default function LoginComponent() {
           />
           <div className='absolute w-full hidden bottom-10 p-6 bg-white bg-opacity-30 backdrop-blur-sm rounded drop-shadow-lg md:block'>
             <span className='text-white text-xl'>
-              Transformando la Experiencia en la Gestión de los procesos judiciales.
+              El chatbot legal mas confiable para nuestros consumidores actualizado con las normas
+              laborales legales del 2023
             </span>
           </div>
         </div>

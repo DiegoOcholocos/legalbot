@@ -13,6 +13,7 @@ const nextConfig = {
     LIMIT_WALLET: process.env.LIMIT_WALLET,
     S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
     S3_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
 };
 

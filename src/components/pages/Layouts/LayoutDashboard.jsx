@@ -16,7 +16,7 @@ const LayoutDashboard = ({ children, session, estudio }) => {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setSidebarCollapsed(false)
+        setSidebarCollapsed(false);
         setShowSidebar(false);
       } else if (!collapsed) {
         setShowSidebar(true);
@@ -70,12 +70,12 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
             {!collapsed && (
               <>
                 <h1 className='font-bold text-lg md:text-2xl mb-4'>
-                  Track <span className='font-bold text-lg  md:text-2xl text-primary-400'>Exp</span>
+                  <span className='font-bold text-lg  md:text-2xl text-primary-400'>LEGAL </span>
+                  bot
                 </h1>
                 <h2 className='text-md font-semibold uppercase'>
                   {session.user.email.split('@')[0]}{' '}
                 </h2>
-                <h2 className='text-sm font-light'>({estudio})</h2>
               </>
             )}
           </div>
@@ -132,8 +132,8 @@ const ItemSidebar = ({ user, permisos, key, icon, nombre, menu, collapsed }) => 
   );
 };
 
-const Navbar = ({ onMenuButtonClick,collapsed }) => {
-  console.log("Estado collapse",collapsed)
+const Navbar = ({ onMenuButtonClick, collapsed }) => {
+  console.log('Estado collapse', collapsed);
   return (
     <div className='md:hidden flex justify-end items-center w-screen md:w-full sticky z-50 py-4 px-8'>
       <Button onClick={onMenuButtonClick}>
