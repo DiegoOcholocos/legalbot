@@ -75,7 +75,7 @@ const Sidebar = ({ collapsed, setCollapsed, shown, session, estudio }) => {
                 <h2 className='text-md font-semibold uppercase'>
                   {session.user.email.split('@')[0]}{' '}
                 </h2>
-                <h2 className='text-sm font-light'>({estudio})</h2>
+                <h2 className='text-sm font-light'>{estudio}</h2>
               </>
             )}
           </div>

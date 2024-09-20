@@ -24,6 +24,15 @@ export async function POST(req) {
     conversationHistory = conversationHistory.slice(-MAX_HISTORY);
   }
 
+  // Instrucciones del sistema para mantener el contexto legal
+  const systemInstructions = {
+    role: 'system',
+    content: `Eres LegalBot, un asistente legal diseñado específicamente para abogados. Tu función es proporcionar información precisa y relevante sobre temas legales, ayudar en la investigación de casos y ofrecer recursos útiles para el ejercicio de la abogacía. Responde exclusivamente a preguntas relacionadas con la práctica del derecho y utiliza terminología legal adecuada.`,
+  };
+
+  // Añadir las instrucciones del sistema al historial
+  const messages = [systemInstructions, ...conversationHistory];
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -33,14 +42,17 @@ export async function POST(req) {
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
-        messages: conversationHistory,
+        messages: messages,
       }),
     });
 
     const data = await response.json();
-    conversationHistory.push({ role: 'assistant', content: data.choices[0].message.content });
+    const assistantMessage = data.choices[0].message.content;
 
-    return NextResponse.json({ text: data.choices[0].message.content });
+    // Añadir la respuesta del asistente al historial
+    conversationHistory.push({ role: 'assistant', content: assistantMessage });
+
+    return NextResponse.json({ text: assistantMessage });
   } catch (error) {
     console.error('Error al comunicarse con OpenAI:', error);
     return NextResponse.json({ error: 'Error al comunicarse con OpenAI.' }, { status: 500 });
