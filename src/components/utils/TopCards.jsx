@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Card, Button, Input, Spacer } from '@nextui-org/react';
 
 const TopCards = () => {
-  const [input, setInput] = useState(''); // Almacenar el texto ingresado
-  const [responseData, setResponseData] = useState([]); // Lista de respuestas
-  const [loading, setLoading] = useState(false); // Indicador de carga
+  const [input, setInput] = useState('');
+  const [responseData, setResponseData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
@@ -20,7 +20,7 @@ const TopCards = () => {
       return;
     }
 
-    setLoading(true); // Inicia el indicador de carga
+    setLoading(true);
 
     try {
       const response = await fetch('/api/chat', {
@@ -28,7 +28,7 @@ const TopCards = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: input }), // Enviar solo el texto ingresado
+        body: JSON.stringify({ prompt: input }),
       });
 
       if (!response.ok) {
@@ -36,12 +36,17 @@ const TopCards = () => {
       }
 
       const data = await response.json();
-      setResponseData((prev) => [...prev, { prompt: input, response: data.text }]); // Añadir la respuesta a la lista
+      setResponseData((prev) => [...prev, { prompt: input, response: data.text }]);
+
+      // Limitar el número de mensajes mostrados
+      if (setResponseData.length > 5) {
+        setResponseData((prev) => prev.slice(-5));
+      }
     } catch (error) {
       console.error('Error al llamar a la API de chat:', error);
     } finally {
-      setLoading(false); // Finaliza el indicador de carga
-      setInput(''); // Limpia el campo de entrada
+      setLoading(false);
+      setInput('');
     }
   };
 
@@ -52,7 +57,7 @@ const TopCards = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '1rem',
+        padding: '2rem',
       }}
     >
       {/* Vista del chat */}
@@ -65,12 +70,12 @@ const TopCards = () => {
           </div>
         ) : (
           responseData.map((item, index) => (
-            <div key={index} style={{ marginBottom: '1rem' }}>
-              <Card css={{ backgroundColor: '#e0f7fa', padding: '0.5rem' }}>
+            <div key={index} style={{ marginBottom: '1.5rem' }}>
+              <Card css={{ backgroundColor: '#e0f7fa', padding: '1rem', marginBottom: '1rem' }}>
                 <strong>Usuario:</strong> {item.prompt}
               </Card>
               <Spacer y={0.5} />
-              <Card css={{ backgroundColor: '#e8f5e9', padding: '0.5rem' }}>
+              <Card css={{ backgroundColor: '#e8f5e9', padding: '1rem', marginBottom: '1rem' }}>
                 <strong>LegalBot:</strong> {item.response}
               </Card>
             </div>
