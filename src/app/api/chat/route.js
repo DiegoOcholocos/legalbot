@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
+export const dynamic = 'force-dynamic'; // Reemplaza esto con la configuración necesaria
 
 let conversationHistory = []; // Historial de la conversación
 const MAX_HISTORY = 5; // Limitar a los últimos 5 mensajes
