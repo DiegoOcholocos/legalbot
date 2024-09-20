@@ -3,9 +3,9 @@ import "./globals.css";
 import { Providers } from './provider';
 
 export const metadata = {
-  title: 'TrackExp',
+  title: 'LegalBot',
   description:
-    'Gestiona eficientemente tus expedientes judiciales, TrackExp hace el seguimiento de tus causas.',
+    'Optimiza la gestión de tus expedientes legales con LegalBot, la IA que monitorea y sigue el progreso de tus casos judiciales.',
   icon: '/favicon.ico',
 };
 
