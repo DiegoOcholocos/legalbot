@@ -75,7 +75,7 @@ const FileViewer = () => {
       </div>
       <div className={styles.fileUploadContainer}>
         <label htmlFor='file-upload' className={styles.fileUploadBtn}>
-          Attach files
+          Agregar Archivos
         </label>
         <input
           type='file'
